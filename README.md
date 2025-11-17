@@ -71,8 +71,8 @@ That’s the core of Kmposable.
 
 ```kotlin
 dependencies {
-    implementation("dev.goquick.kmposable:core:0.1.0")
-    implementation("dev.goquick.kmposable:compose:0.1.0") // optional UI layer
+    implementation("dev.goquick.kmposable:core:0.2.0")
+    implementation("dev.goquick.kmposable:compose:0.2.0") // optional UI layer
 }
 ```
 
