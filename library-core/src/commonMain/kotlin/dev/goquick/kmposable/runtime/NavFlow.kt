@@ -8,6 +8,7 @@ import dev.goquick.kmposable.core.nav.KmposableNavigator
 import dev.goquick.kmposable.core.nav.KmposableStackEntry
 import dev.goquick.kmposable.core.nav.KmposableStackNavigator
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -155,7 +156,7 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     protected open fun observeNodeOutputs(node: Node<*, *, OUT>) {
         val token = NodeToken(node)
         if (outputCollectors.containsKey(token)) return
-        val job = appScope.launch {
+        val job = appScope.launch(start = CoroutineStart.UNDISPATCHED) {
             node.outputs.collect { output ->
                 emitRuntimeOutput(output)
                 onNodeOutput(node, output)

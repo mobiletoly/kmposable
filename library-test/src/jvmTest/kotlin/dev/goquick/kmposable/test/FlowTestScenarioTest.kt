@@ -6,7 +6,6 @@ import dev.goquick.kmposable.runtime.SimpleNavFlowFactory
 import kotlin.test.Test
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -16,8 +15,8 @@ class FlowTestScenarioTest {
     fun scenario_runs_flow_without_ui() = runTest {
         val factory = SimpleNavFlowFactory<TestOutput> {
             NavFlow(
-                appScope = backgroundScope,
-                rootNode = RootNode(backgroundScope)
+                appScope = this,
+                rootNode = RootNode(this)
             )
         }
 
@@ -38,7 +37,7 @@ class FlowTestScenarioTest {
     ) {
         override fun onEvent(event: TestEvent) {
             when (event) {
-                is TestEvent.Emit -> scope.launch {
+                is TestEvent.Emit -> {
                     tryEmitOutput(TestOutput(event.target))
                 }
             }

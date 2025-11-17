@@ -6,6 +6,7 @@ import dev.goquick.kmposable.runtime.NavFlowFactory
 import dev.goquick.kmposable.runtime.NavFlow
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.launch
@@ -25,7 +26,7 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     suspend fun start(): FlowTestScenario<OUT, ENTRY> = apply {
         if (started) return@apply
         started = true
-        outputsJob = scope.launch {
+        outputsJob = scope.launch(start = CoroutineStart.UNDISPATCHED) {
             runtime.outputs.collect { collectedOutputs.addLast(it) }
         }
         runtime.start()
@@ -60,15 +61,8 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         }
     }
 
-    fun assertNextOutput(expected: OUT): FlowTestScenario<OUT, ENTRY> = apply {
-        val actual = if (collectedOutputs.isEmpty()) {
-            null
-        } else {
-            collectedOutputs.removeFirst()
-        } ?: error(
-            "Expected next output '$expected' but collector queue was empty.\n" +
-                    "Buffered outputs: $collectedOutputs"
-        )
+suspend fun assertNextOutput(expected: OUT): FlowTestScenario<OUT, ENTRY> = apply {
+        val actual = awaitNextOutput()
         check(actual == expected) {
             "Expected next output '$expected' but was '$actual'"
         }
