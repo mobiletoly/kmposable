@@ -1,5 +1,10 @@
 # Kmposable
 
+[![Kotlin Multiplatform](https://img.shields.io/badge/Kotlin-Multiplatform-blue?logo=kotlin)](https://kotlinlang.org/docs/multiplatform.html)
+[![Maven Central](https://img.shields.io/maven-central/v/dev.goquick.kmposable/core?logo=apache-maven&label=Maven%20Central)](https://central.sonatype.com/artifact/dev.goquick.kmposable/core)
+[![CI](https://img.shields.io/github/actions/workflow/status/mobiletoly/kmposable/gradle.yml?branch=main&logo=github&label=CI)](https://github.com/mobiletoly/kmposable/actions/workflows/gradle.yml)
+[![License](https://img.shields.io/github/license/mobiletoly/kmposable?logo=apache&label=License)](LICENSE)
+
 A **UI-agnostic navigation + flow engine** for Kotlin Multiplatform.  
 Kmposable lets you structure your app as pure, testable **Nodes** (state + events + outputs).  
 Compose UI becomes a thin rendering layer on top.
@@ -71,8 +76,8 @@ That’s the core of Kmposable.
 
 ```kotlin
 dependencies {
-    implementation("dev.goquick.kmposable:core:0.2.0")
-    implementation("dev.goquick.kmposable:compose:0.2.0") // optional UI layer
+    implementation("dev.goquick.kmposable:core:<latest-version>")
+    implementation("dev.goquick.kmposable:compose:<latest-version>") // optional UI layer
 }
 ```
 
