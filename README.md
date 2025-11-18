@@ -26,7 +26,7 @@ Modern Compose apps often struggle with:
 
 State + events + outputs. No UI code.
 
-### ✔ A tiny navigation flow that manages navigation
+### ✔ A tiny NavFlow engine that manages navigation
 
 Push, pop, replace — all headless.
 
@@ -201,11 +201,11 @@ Define it via the DSL and keep it stable with `remember`:
 val renderer = remember {
     nodeRenderer<ContactsOutput> {
         register<ContactsListNode> { node ->
-            val state by node.collectStateAsState()
+            val state by node.state.collectAsState()
             ContactsListScreen(state = state, onEvent = node::onEvent)
         }
         register<ContactDetailsNode> { node ->
-            val state by node.collectStateAsState()
+            val state by node.state.collectAsState()
             ContactDetailsScreen(state = state, onEvent = node::onEvent)
         }
     }
@@ -244,7 +244,7 @@ fun CounterScreen() {
 
 ---
 
-# NavHost Integration (Compose Multiplatform)
+# NavHost Integration (Compose Multiplatform UI)
 
 Kmposable plays nicely with `androidx.navigation.compose.NavHost` when you want NavHost to own
 **top-level app routing** (tabs, drawers, deep links) and Kmposable to handle **feature flows**.
@@ -296,15 +296,15 @@ fun ContactsDestination(navController: NavHostController) {
     val renderer = remember {
         nodeRenderer<ContactsOutput> {
             register<ContactsListNode> { node ->
-                val state by node.collectStateAsState()
+                val state by node.state.collectAsState()
                 ContactsListScreen(state = state, onEvent = node::onEvent)
             }
             register<ContactDetailsNode> { node ->
-                val state by node.collectStateAsState()
+                val state by node.state.collectAsState()
                 ContactDetailsScreen(state = state, onEvent = node::onEvent)
             }
             register<EditContactNode> { node ->
-                val state by node.collectStateAsState()
+                val state by node.state.collectAsState()
                 EditContactScreen(state = state, onEvent = node::onEvent)
             }
         }
@@ -334,8 +334,7 @@ fun SettingsDestination() {
 ```
 
 This keeps simple destinations headless and testable, while flows with internal navigation
-use NavFlow.
-introducing extra NavFlow or ViewModel layers.
+use NavFlow without introducing extra NavFlow or ViewModel layers.
 
 ### Patterns to keep in mind
 

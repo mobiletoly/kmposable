@@ -12,7 +12,12 @@ plugins {
 
 @OptIn(ExperimentalComposeLibrary::class)
 kotlin {
-    jvm()
+    jvmToolchain(17)
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
     androidLibrary {
         namespace = "dev.goquick.kmposable.compose"
         compileSdk = libs.versions.androidCompileSdk.get().toInt()
@@ -24,12 +29,8 @@ kotlin {
             sourceSetTreeName = "test"
         }
 
-        compilations.configureEach {
-            compileTaskProvider.configure {
-                compilerOptions {
-                    jvmTarget.set(JvmTarget.JVM_17)
-                }
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     iosX64()

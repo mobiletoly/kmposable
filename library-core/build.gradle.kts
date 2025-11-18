@@ -8,7 +8,12 @@ plugins {
 }
 
 kotlin {
-    jvm()
+    jvmToolchain(17)
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
     androidLibrary {
         namespace = "dev.goquick.kmposable.library"
         compileSdk = libs.versions.androidCompileSdk.get().toInt()
@@ -20,12 +25,8 @@ kotlin {
             sourceSetTreeName = "test"
         }
 
-        compilations.configureEach {
-            compilerOptions.configure {
-                jvmTarget.set(
-                    JvmTarget.JVM_17
-                )
-            }
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     iosX64()

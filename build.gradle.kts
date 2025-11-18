@@ -7,7 +7,7 @@ plugins {
     id("com.android.application") version "8.13.1" apply false
     id("com.android.library") version "8.13.1" apply false
     id("com.android.kotlin.multiplatform.library") version "8.13.1" apply false
-    id("com.vanniktech.maven.publish") version "0.34.0" apply false
+    id("com.vanniktech.maven.publish") version "0.35.0" apply false
 }
 
 val kmposableGroup: String by project

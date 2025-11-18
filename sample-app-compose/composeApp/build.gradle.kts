@@ -9,6 +9,12 @@ plugins {
 }
 
 kotlin {
+    jvmToolchain(17)
+    jvm {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_17)
+        }
+    }
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -24,8 +30,6 @@ kotlin {
             isStatic = true
         }
     }
-    
-    jvm()
     
     sourceSets {
         androidMain.dependencies {
