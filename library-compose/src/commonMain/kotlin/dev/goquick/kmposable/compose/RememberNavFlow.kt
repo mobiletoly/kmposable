@@ -24,6 +24,16 @@ import dev.goquick.kmposable.core.nav.KmposableStackEntry
 import dev.goquick.kmposable.runtime.NavFlow
 import kotlinx.coroutines.CoroutineScope
 
+/**
+ * Creates and remembers a [NavFlow] whose lifecycle is tied to the surrounding composable.
+ *
+ * - A single flow instance is created per [key].
+ * - [NavFlow.start] is called automatically inside a [LaunchedEffect].
+ * - [NavFlow.dispose] is invoked when the composable leaves composition.
+ *
+ * Pass a factory that builds the flow using the provided [CoroutineScope], which matches the
+ * composable's lifetime (via [rememberCoroutineScope]).
+ */
 @Composable
 fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> rememberNavFlow(
     key: Any? = Unit,

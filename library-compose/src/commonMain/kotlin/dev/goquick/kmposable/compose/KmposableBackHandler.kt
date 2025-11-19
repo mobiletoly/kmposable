@@ -18,5 +18,10 @@ package dev.goquick.kmposable.compose
 import androidx.compose.runtime.Composable
 import dev.goquick.kmposable.runtime.NavFlow
 
+/**
+ * Platform-specific back handling that delegates system back presses to the provided [NavFlow].
+ *
+ * Each target provides an actual implementation that hooks into the appropriate back dispatcher.
+ */
 @Composable
 expect fun <OUT : Any> KmposableBackHandler(runtime: NavFlow<OUT, *>)

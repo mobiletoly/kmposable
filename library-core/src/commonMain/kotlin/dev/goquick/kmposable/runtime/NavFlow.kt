@@ -207,6 +207,19 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         @Suppress("UNCHECKED_CAST")
         return DefaultStackEntry(node) as ENTRY
     }
+
+    internal fun navigatorHandle(): KmposableNavigator<OUT, ENTRY> = navigator
+
+    internal fun entryFor(node: Node<*, *, OUT>): ENTRY = createEntry(node)
+
+    internal fun mutateNavigator(mutator: (KmposableNavigator<OUT, ENTRY>) -> Unit) {
+        val beforeNodes = navState.value.stack.map { it.node }
+        mutator(navigator)
+        val afterNodes = navState.value.stack.map { it.node }
+
+        beforeNodes.filterNot { it in afterNodes }.forEach { detachNode(it) }
+        afterNodes.filterNot { it in beforeNodes }.forEach { attachNode(it) }
+    }
 }
 
 typealias SimpleNavFlow<OUT> = NavFlow<OUT, DefaultStackEntry<OUT>>

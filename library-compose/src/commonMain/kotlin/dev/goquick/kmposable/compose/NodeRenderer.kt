@@ -43,16 +43,19 @@ class NodeRenderer<OUT : Any> internal constructor(
     }
 }
 
+/** Builder DSL used by [nodeRenderer]. */
 class NodeRendererBuilder<OUT : Any> internal constructor() {
     @PublishedApi
     internal val delegates = LinkedHashMap<KClass<out Node<*, *, OUT>>, @Composable (Node<*, *, OUT>) -> Unit>()
     @PublishedApi
     internal var fallback: (@Composable (Node<*, *, OUT>) -> Unit)? = null
 
+    /** Registers a renderer for the given node type [T]. */
     inline fun <reified T : Node<*, *, OUT>> register(noinline renderer: @Composable (T) -> Unit) {
         delegates[T::class] = { node -> renderer(node as T) }
     }
 
+    /** Sets a fallback renderer used when no type-specific delegate is found. */
     fun fallback(renderer: @Composable (Node<*, *, OUT>) -> Unit) {
         fallback = renderer
     }
@@ -60,6 +63,11 @@ class NodeRendererBuilder<OUT : Any> internal constructor() {
     internal fun build(): NodeRenderer<OUT> = NodeRenderer(delegates.toMap(), fallback)
 }
 
+/**
+ * Creates a [NodeRenderer] by registering Composable implementations for node types.
+ *
+ * Typical usage wraps this in `remember { nodeRenderer { … } }` so the renderer is stable.
+ */
 fun <OUT : Any> nodeRenderer(builder: NodeRendererBuilder<OUT>.() -> Unit): NodeRenderer<OUT> {
     return NodeRendererBuilder<OUT>().apply(builder).build()
 }

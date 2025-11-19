@@ -22,5 +22,7 @@ include(
     ":library-compose",
     ":library-test",
     ":sample-app-compose",
-    ":sample-app-compose:composeApp"
+    ":sample-app-compose:composeApp",
+    ":sample-app-flowscript",
+    ":sample-app-flowscript:composeApp"
 )

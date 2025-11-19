@@ -1,0 +1,26 @@
+# Kmposable documentation site (Jekyll)
+
+title: Kmposable
+email:
+description: >-
+  Kotlin Multiplatform NavFlow + Compose toolkit with headless-first architecture
+baseurl: "/kmposable"
+url: "https://mobiletoly.github.io"
+twitter_username:
+github_username: mobiletoly
+
+repository: mobiletoly/kmposable
+github:
+  repository_url: https://github.com/mobiletoly/kmposable
+  repository_name: kmposable
+
+theme: minima
+plugins:
+  - jekyll-feed
+
+header_pages:
+  - overview.md
+  - guides.md
+  - reference.md
+  - cookbook.md
+  - specs.md

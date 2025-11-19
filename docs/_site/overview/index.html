@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1"><!-- Begin Jekyll SEO tag v2.8.0 -->
+<title>Overview | Kmposable</title>
+<meta name="generator" content="Jekyll v3.10.0" />
+<meta property="og:title" content="Overview" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="Kotlin Multiplatform NavFlow + Compose toolkit with headless-first architecture" />
+<meta property="og:description" content="Kotlin Multiplatform NavFlow + Compose toolkit with headless-first architecture" />
+<link rel="canonical" href="http://localhost:4000/kmposable/overview/" />
+<meta property="og:url" content="http://localhost:4000/kmposable/overview/" />
+<meta property="og:site_name" content="Kmposable" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary" />
+<meta property="twitter:title" content="Overview" />
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebPage","description":"Kotlin Multiplatform NavFlow + Compose toolkit with headless-first architecture","headline":"Overview","url":"http://localhost:4000/kmposable/overview/"}</script>
+<!-- End Jekyll SEO tag -->
+<link rel="stylesheet" href="/kmposable/assets/main.css"><link type="application/atom+xml" rel="alternate" href="http://localhost:4000/kmposable/feed.xml" title="Kmposable" /></head>
+<body>
+
+    <!-- GitHub Repository Info Bar -->
+<div class="github-info-bar">
+  <div class="github-info-content">
+    <a href="https://github.com/mobiletoly/kmposable" class="github-repo-link">
+      <svg class="github-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+        <path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+      </svg>
+      <span class="repo-name">kmposable</span>
+    </a>
+    <div class="github-stats">
+      <a href="https://github.com/mobiletoly/kmposable/stargazers" class="github-stat">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <path fill-rule="evenodd" d="M8 .25a.75.75 0 01.673.418l1.882 3.815 4.21.612a.75.75 0 01.416 1.279l-3.046 2.97.719 4.192a.75.75 0 01-1.088.791L8 12.347l-3.766 1.98a.75.75 0 01-1.088-.79l.72-4.194L.818 6.374a.75.75 0 01.416-1.28l4.21-.611L7.327.668A.75.75 0 018 .25z"></path>
+        </svg>
+        <span class="github-stat-count" id="star-count">-</span>
+      </a>
+      <a href="https://github.com/mobiletoly/kmposable/network/members" class="github-stat">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
+          <path fill-rule="evenodd" d="M5 3.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm0 2.122a2.25 2.25 0 10-1.5 0v.878A2.25 2.25 0 005.75 8.5h1.5v2.128a2.251 2.251 0 101.5 0V8.5h1.5a2.25 2.25 0 002.25-2.25v-.878a2.25 2.25 0 10-1.5 0v.878a.75.75 0 01-.75.75h-4.5A.75.75 0 015 6.25v-.878z"></path>
+        </svg>
+        <span class="github-stat-count" id="fork-count">-</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<style>
+.github-info-bar {
+  background: #24292f;
+  color: #f0f6fc;
+  padding: 8px 0;
+  font-size: 14px;
+  border-bottom: 1px solid #30363d;
+}
+
+.github-info-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.github-repo-link {
+  display: flex;
+  align-items: center;
+  color: #f0f6fc;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.github-repo-link:hover {
+  color: #58a6ff;
+}
+
+.github-icon {
+  margin-right: 8px;
+}
+
+.github-stats {
+  display: flex;
+  gap: 16px;
+}
+
+.github-stat {
+  display: flex;
+  align-items: center;
+  color: #8b949e;
+  text-decoration: none;
+  font-size: 12px;
+  transition: color 0.2s;
+}
+
+.github-stat:hover {
+  color: #58a6ff;
+}
+
+.github-stat svg {
+  margin-right: 4px;
+}
+
+.github-stat-count {
+  font-weight: 600;
+}
+
+.repo-name {
+  color: #f0f6fc;
+}
+
+@media (max-width: 768px) {
+  .github-info-content {
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  
+  .github-stats {
+    gap: 12px;
+  }
+}
+</style>
+
+<script>
+// Fetch GitHub repository stats
+(function() {
+  const repoUrl = 'https://github.com/mobiletoly/kmposable';
+  const apiUrl = repoUrl.replace('https://github.com/', 'https://api.github.com/repos/');
+  
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('star-count').textContent = data.stargazers_count || '0';
+      document.getElementById('fork-count').textContent = data.forks_count || '0';
+    })
+    .catch(error => {
+      console.log('Could not fetch GitHub stats:', error);
+    });
+})();
+</script>
+<header class="site-header" role="banner">
+
+  <div class="wrapper"><a class="site-title" rel="author" href="/kmposable/">Kmposable</a><nav class="site-nav">
+        <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+        <label for="nav-trigger">
+          <span class="menu-icon">
+            <svg viewBox="0 0 18 15" width="18px" height="15px">
+              <path d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.032C17.335,0,18,0.665,18,1.484L18,1.484z M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.032C17.335,6.031,18,6.696,18,7.516L18,7.516z M18,13.516C18,14.335,17.335,15,16.516,15H1.484 C0.665,15,0,14.335,0,13.516l0,0c0-0.82,0.665-1.483,1.484-1.483h15.032C17.335,12.031,18,12.695,18,13.516L18,13.516z"/>
+            </svg>
+          </span>
+        </label>
+
+        <div class="trigger"><a class="page-link" href="/kmposable/overview/">Overview</a><a class="page-link" href="/kmposable/guides/">Guides</a><a class="page-link" href="/kmposable/reference/">Reference</a><a class="page-link" href="/kmposable/cookbook/">Cookbook</a><a class="page-link" href="/kmposable/specs/">Specs &amp; Decisions</a></div>
+      </nav></div>
+</header>
+
+<style>
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 220px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  top: 100%;
+  left: 0;
+}
+
+.dropdown-content a {
+  color: #424242 !important;
+  padding: 0 16px;
+  text-decoration: none;
+  display: block;
+  font-size: 14px;
+  border-bottom: 1px solid #eee;
+}
+
+.dropdown-content a:last-child {
+  border-bottom: none;
+}
+
+.dropdown-content a:hover {
+  background-color: #f1f1f1;
+  color: #0969da !important;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown-toggle::after {
+  content: " ▼";
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+@media screen and (max-width: 600px) {
+  .dropdown {
+    display: block;
+    width: 100%;
+  }
+
+  .dropdown-content {
+    position: static;
+    display: none;
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+    margin-left: 20px;
+  }
+
+  .dropdown-content a {
+    padding: 5px 10px;
+    border-bottom: none;
+    color: #828282 !important;
+  }
+
+  .dropdown:hover .dropdown-content,
+  .dropdown.active .dropdown-content {
+    display: block;
+  }
+
+  .dropdown-toggle {
+    cursor: pointer;
+  }
+}
+</style>
+
+<script>
+// Mobile dropdown toggle
+document.addEventListener('DOMContentLoaded', function() {
+  const dropdowns = document.querySelectorAll('.dropdown');
+
+  dropdowns.forEach(function(dropdown) {
+    const toggle = dropdown.querySelector('.dropdown-toggle');
+
+    toggle.addEventListener('click', function(e) {
+      if (window.innerWidth <= 600) {
+        e.preventDefault();
+        dropdown.classList.toggle('active');
+      }
+    });
+  });
+});
+</script>
+<main class="page-content" aria-label="Content">
+      <div class="wrapper">
+        <article class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Overview</h1>
+  </header>
+
+  <div class="post-content">
+    <h2 id="why-kmposable">Why Kmposable?</h2>
+
+<p>Modern Compose/KMP apps struggle when navigation and business logic live inside UI layers:</p>
+
+<ul>
+  <li>ViewModels become dumping grounds for flows, validation, and navigation state.</li>
+  <li>Navigation APIs are platform-specific, making reuse across Android/iOS/Desktop awkward.</li>
+  <li>Testing a “flow” (list → details → edit) usually requires Compose and an emulator.</li>
+</ul>
+
+<p>Kmposable flips the script:</p>
+
+<ol>
+  <li><strong>Nodes</strong> hold state + events + outputs. They are pure Kotlin, no UI dependencies.</li>
+  <li><strong>NavFlow</strong> is a headless runtime that manages a stack of nodes (push, pop, replace, popTo…).</li>
+  <li><strong>Adapters</strong> (Compose, FlowTestScenario, scripts) simply observe NavFlow.</li>
+</ol>
+
+<p>As a result you can build entire flows headlessly, render them in Compose, and test them without UI.</p>
+
+<h2 id="mental-model">Mental Model</h2>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Node (state, events, outputs)
+        |
+        | outputs
+        v
+Navigator &lt;---- NavFlow ----&gt; UI Renderer
+</code></pre></div></div>
+
+<ul>
+  <li>Nodes emit outputs when they need to communicate (e.g., “open details”).</li>
+  <li>NavFlow captures those outputs so scripts or adapters can react (navigate, trigger DI, etc.).</li>
+  <li>Compose observes <code class="language-plaintext highlighter-rouge">navFlow.navState</code>, renders <code class="language-plaintext highlighter-rouge">nodeRenderer</code> output, and feeds user events back.</li>
+</ul>
+
+<h2 id="modules">Modules</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Module</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">library-core</code></td>
+      <td>Headless runtime (<code class="language-plaintext highlighter-rouge">Node</code>, <code class="language-plaintext highlighter-rouge">StatefulNode</code>, <code class="language-plaintext highlighter-rouge">NavFlow</code>, script APIs, helpers).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">library-compose</code></td>
+      <td>Thin Compose adapter (renderers, <code class="language-plaintext highlighter-rouge">NavFlowHost</code>, <code class="language-plaintext highlighter-rouge">KmposableBackHandler</code>).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">library-test</code></td>
+      <td><code class="language-plaintext highlighter-rouge">FlowTestScenario</code> DSL for headless testing + script helpers.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">sample-app-compose</code></td>
+      <td>Compose Multiplatform sample (NavHost tabs + Kmposable flow).</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">sample-app-flowscript</code></td>
+      <td>Same UI but orchestrated via NavFlow scripts to show sequential flows.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Artifacts are published to Maven Central under <code class="language-plaintext highlighter-rouge">dev.goquick.kmposable:*</code>. See the
+<a href="/kmposable/guides/#getting-started">Getting Started guide</a> for coordinates.</p>
+
+<h2 id="samples">Samples</h2>
+
+<ul>
+  <li><strong>Compose sample</strong> – uses NavHost for top-level destinations and Kmposable for inner flows.</li>
+  <li><strong>FlowScript sample</strong> – reuses the same nodes but drives everything via a NavFlow script.</li>
+</ul>
+
+<p>Both samples live in the repository root and include ready-to-run Gradle tasks. Follow the
+instructions inside each <code class="language-plaintext highlighter-rouge">sample-app-*</code> directory.</p>
+
+<h2 id="where-to-go-next">Where to go next</h2>
+
+<ul>
+  <li><a href="/kmposable/guides/">Guides</a> – install, Compose integration, scripts, and testing.</li>
+  <li><a href="/kmposable/cookbook/">Cookbook</a> – real-world recipes and patterns.</li>
+  <li><a href="/kmposable/reference/">Reference</a> – API notes for core/compose/test modules.</li>
+  <li><a href="/kmposable/specs/">Specs</a> – architecture decisions and RFCs.</li>
+</ul>
+
+  </div>
+
+</article>
+
+      </div>
+    </main><footer class="site-footer h-card">
+  <data class="u-url" href="/kmposable/"></data>
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kmposable</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li class="p-name">Kmposable</li></ul>
+      </div>
+
+      <div class="footer-col footer-col-2"><ul class="social-media-list"><li><a href="https://github.com/mobiletoly"><svg class="svg-icon"><use xlink:href="/kmposable/assets/minima-social-icons.svg#github"></use></svg> <span class="username">mobiletoly</span></a></li></ul>
+</div>
+
+      <div class="footer-col footer-col-3">
+        <p>Kotlin Multiplatform NavFlow + Compose toolkit with headless-first architecture</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+</body>
+
+</html>

@@ -20,7 +20,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import dev.goquick.kmposable.runtime.NavFlow
 
-/** Renders the top kmposable node and optionally wires the shared back handler. */
+/**
+ * Observes [navFlow] and renders whichever node sits on top using [renderer].
+ *
+ * Set [enableBackHandler] to false if hosting within an environment that already handles back.
+ */
 @Composable
 fun <OUT : Any> NavFlowHost(
     navFlow: NavFlow<OUT, *>,
