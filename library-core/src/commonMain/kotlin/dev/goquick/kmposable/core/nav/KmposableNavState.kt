@@ -26,6 +26,21 @@ interface KmposableStackEntry<OUT : Any> {
     val tag: String?
 }
 
+enum class Presentation { Primary, Overlay }
+
+/**
+ * Optional marker for nodes to hint their presentation style to hosts.
+ * Defaults to [Presentation.Primary]; override to [Presentation.Overlay]
+ * when a node should render as an overlay on top of the primary content.
+ */
+interface PresentationAware {
+    val presentation: Presentation get() = Presentation.Primary
+}
+
+/** Convenience helper to check if an object declares overlay presentation. */
+fun Any?.isOverlayPresentation(): Boolean =
+    (this as? PresentationAware)?.presentation == Presentation.Overlay
+
 /** Default stack entry implementation that simply wraps a [Node]. */
 data class DefaultStackEntry<OUT : Any>(
     override val node: Node<*, *, OUT>,

@@ -2,11 +2,10 @@ package dev.goquick.kmposable.sampleapp.contacts
 
 import dev.goquick.kmposable.core.nav.DefaultStackEntry
 import dev.goquick.kmposable.runtime.NavFlow
-import dev.goquick.kmposable.runtime.NavFlowScriptScope
 import dev.goquick.kmposable.runtime.awaitOutputCase
-import dev.goquick.kmposable.runtime.launchNavFlowScript
+import dev.goquick.kmposable.runtime.FlowStepContext
 import dev.goquick.kmposable.runtime.pushForResult
-import dev.goquick.kmposable.runtime.runCatchingNodeCall
+import dev.goquick.kmposable.runtime.runFlow
 import dev.goquick.kmposable.runtime.withNode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -25,42 +24,41 @@ fun NavFlow<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.launchConta
     nodeScope: CoroutineScope,
     repository: ContactsRepository,
     onTrace: ((String) -> Unit)? = null
-): Job = launchNavFlowScript(scriptScope, onTrace) {
-    runContactsFlowScript(repository, nodeScope)
-}
-
-suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.runContactsFlowScript(
-    repository: ContactsRepository,
-    nodeScope: CoroutineScope
-) {
-    while (true) {
-        showContactsList(repository)
-        when (val action = awaitListAction()) {
-            is ListAction.Open -> runDetailsFlow(action.id, repository, nodeScope)
-            ListAction.Create -> runEditorFlow(existing = null, repository = repository, nodeScope = nodeScope)
+): Job = runFlow(scriptScope, onTrace) {
+    step("Contacts loop") {
+        while (true) {
+            loadContacts(repository)
+            when (val action = awaitListAction()) {
+                is ListAction.Open -> runDetailsFlow(action.id, repository, nodeScope)
+                ListAction.Create -> runEditorFlow(
+                    existing = null,
+                    repository = repository,
+                    nodeScope = nodeScope
+                )
+            }
         }
     }
 }
 
-private suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.showContactsList(
+private suspend fun FlowStepContext<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.loadContacts(
     repository: ContactsRepository
 ) {
-    val listNode = navFlow.navState.value.root as ContactsListNode
-    runCatchingNodeCall(
-        onLoading = listNode::showLoading,
-        onSuccess = listNode::showContacts,
-        onError = { listNode.showError(it.message ?: "Unable to load contacts") }
-    ) {
-        repository.getAll()
-    }
+    updateNode<ContactsListNode> { showLoading() }
+    call { repository.getAll() }
+        .onSuccess { contacts -> updateNode<ContactsListNode> { showContacts(contacts) } }
+        .onFailure { error ->
+            updateNode<ContactsListNode> {
+                showError(error.message ?: "Unable to load contacts")
+            }
+        }
 }
 
-private suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.runDetailsFlow(
+private suspend fun FlowStepContext<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.runDetailsFlow(
     id: ContactId,
     repository: ContactsRepository,
     nodeScope: CoroutineScope
 ) {
-    withNode(factory = { ContactDetailsNode(id, nodeScope) }) {
+    script.withNode(factory = { ContactDetailsNode(id, nodeScope) }) {
         showLoading()
         var currentContact = loadContact(repository)
         if (currentContact == null) return@withNode
@@ -75,10 +73,12 @@ private suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<Cont
                         showContact(currentContact)
                     }
                 }
+
                 is DetailsAction.Delete -> {
                     repository.delete(action.id)
                     return@withNode
                 }
+
                 DetailsAction.Back -> {
                     return@withNode
                 }
@@ -87,12 +87,12 @@ private suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<Cont
     }
 }
 
-private suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.runEditorFlow(
+private suspend fun FlowStepContext<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.runEditorFlow(
     existing: Contact?,
     repository: ContactsRepository,
     nodeScope: CoroutineScope
 ): Contact? {
-    return when (val result = pushForResult(
+    return when (val result = script.pushForResult(
         factory = { EditContactNode(existingContact = existing, parentScope = nodeScope) },
         mapper = { event ->
             when (event) {
@@ -106,6 +106,7 @@ private suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<Cont
             repository.upsert(result.contact)
             result.contact
         }
+
         EditorResult.Cancelled -> null
     }
 }
@@ -115,7 +116,7 @@ private sealed interface ListAction {
     data object Create : ListAction
 }
 
-private suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.awaitListAction(): ListAction =
+private suspend fun FlowStepContext<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.awaitListAction(): ListAction =
     awaitOutputCase {
         on<ContactsFlowEvent.OpenContact> { ListAction.Open(it.id) }
         on<ContactsFlowEvent.CreateContact> { ListAction.Create }
@@ -127,7 +128,7 @@ private sealed interface DetailsAction {
     data object Back : DetailsAction
 }
 
-private suspend fun NavFlowScriptScope<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.awaitDetailsAction(): DetailsAction =
+private suspend fun FlowStepContext<ContactsFlowEvent, DefaultStackEntry<ContactsFlowEvent>>.awaitDetailsAction(): DetailsAction =
     awaitOutputCase {
         on<ContactsFlowEvent.OpenEditor> { DetailsAction.Edit(it.contact) }
         on<ContactsFlowEvent.DeleteContact> { DetailsAction.Delete(it.id) }

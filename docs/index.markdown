@@ -13,7 +13,6 @@ collects the guides, references, and recipes that were previously scattered acro
 - [Guides]({{ site.baseurl }}/guides/) – install, Compose integration, scripts, testing.
 - [Reference]({{ site.baseurl }}/reference/) – API summaries for Node/NavFlow/renderer/test helpers.
 - [Cookbook]({{ site.baseurl }}/cookbook/) – practical patterns (reactive and script-driven).
-- [Specs & RFCs]({{ site.baseurl }}/specs/) – in-depth design documents.
 
 Looking for code right away? Clone the repo and explore:
 

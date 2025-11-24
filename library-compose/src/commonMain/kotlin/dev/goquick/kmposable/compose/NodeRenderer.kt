@@ -28,7 +28,7 @@ class NodeRenderer<OUT : Any> internal constructor(
     fun canRender(node: Node<*, *, OUT>): Boolean = findRenderer(node) != null || fallback != null
 
     @Composable
-    internal fun Render(node: Node<*, *, OUT>) {
+    fun Render(node: Node<*, *, OUT>) {
         val renderer = findRenderer(node)
             ?: fallback ?: error("No renderer registered for ${node::class}")
         renderer(node)

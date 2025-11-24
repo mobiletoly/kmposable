@@ -9,12 +9,12 @@ repository – each section below links to source directories.
 
 ## Core Primitives (`library-core/src/commonMain/kotlin/dev/goquick/kmposable/core`)
 
-| Type | Purpose |
-| --- | --- |
-| `Node<STATE, EVENT, OUTPUT>` | Minimal interface (state `StateFlow`, `onEvent`, outputs `Flow`). |
-| `LifecycleAwareNode` | Optional hooks (`onAttach`, `onDetach`) invoked when NavFlow pushes/pops nodes. |
-| `StatefulNode` | Base class that manages state via `MutableStateFlow`, exposes `updateState`, `emitOutput`. |
-| `DelegatingNode` | Wraps another node and delegates everything by default – override only the parts you need (e.g., map outputs). |
+| Type                         | Purpose                                                                                                        |
+|------------------------------|----------------------------------------------------------------------------------------------------------------|
+| `Node<STATE, EVENT, OUTPUT>` | Minimal interface (state `StateFlow`, `onEvent`, outputs `Flow`).                                              |
+| `LifecycleAwareNode`         | Optional hooks (`onAttach`, `onDetach`) invoked when NavFlow pushes/pops nodes.                                |
+| `StatefulNode`               | Base class that manages state via `MutableStateFlow`, exposes `updateState`, `emitOutput`.                     |
+| `DelegatingNode`             | Wraps another node and delegates everything by default – override only the parts you need (e.g., map outputs). |
 
 ## Navigation Runtime (`library-core/runtime`)
 
@@ -27,7 +27,8 @@ repository – each section below links to source directories.
 - `KmposableStackEntry` / `DefaultStackEntry` – pair node with metadata; override when you need tags
   or IDs for testing/analytics.
 - `NavFlowScriptScope` – script-facing API (`showRoot`, `pushNode`, `replaceTop`, `awaitOutput*`,
-  `trace`, `createEntry`). Run scripts via `NavFlow.launchNavFlowScript(scope, onTrace, script)`.
+  `trace`, `createEntry`). Run scripts via `NavFlow.runFlow(scope, onTrace) { step { … } }` or
+  `NavFlow.launchNavFlowScript(scope, onTrace, script)`.
 - Helpers: `runCatchingNodeCall`, `awaitOutputCase`, `pushForResult`, `withNode`, etc.
 
 ## Compose Adapters (`library-compose`)
@@ -36,7 +37,8 @@ repository – each section below links to source directories.
 - `NavFlowHost(navFlow, renderer, enableBackHandler)` – observes `navFlow.navState` and renders the
   top node. Automatically wires `KmposableBackHandler` unless disabled.
 - `nodeRenderer { register<MyNode> { … } }` – DSL mapping node types to composables.
-- `KmposableBackHandler` – expect/actual back handling that delegates to NavFlow (Android/iOS/Desktop).
+- `KmposableBackHandler` – expect/actual back handling that delegates to NavFlow (
+  Android/iOS/Desktop).
 
 ## Testing (`library-test`)
 
@@ -54,13 +56,14 @@ Factory helpers: `NavFlowFactory.createTestScenario(scope)` builds a new runtime
 
 ## Script Helpers (summary)
 
-| Helper | Description |
-| --- | --- |
-| `showRoot`, `pushNode`, `replaceTop` | Stack operations without dealing with entries. |
-| `awaitOutputOfType`, `awaitOutputCase`, `awaitMappedOutput` | Wait for future outputs. |
-| `pushForResult`, `withNode` | Push a temporary node for a block/result and pop automatically. |
-| `runCatchingNodeCall` | Display loading/success/error state while running suspending work. |
-| `trace { … }` | Send debug logs via `onTrace` callback passed to `launchNavFlowScript`. |
+| Helper                                                      | Description                                                                         |
+|-------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| `showRoot`, `pushNode`, `replaceTop`                        | Stack operations without dealing with entries.                                      |
+| `awaitOutputOfType`, `awaitOutputCase`, `awaitMappedOutput` | Wait for future outputs.                                                            |
+| `pushForResult`, `withNode`                                 | Push a temporary node for a block/result and pop automatically.                     |
+| `runCatchingNodeCall`                                       | Display loading/success/error state while running suspending work.                  |
+| `trace { … }`                                               | Send debug logs via `onTrace` callback passed to `runFlow` / `launchNavFlowScript`. |
 
-Combine these helpers to orchestrate complex flows headlessly. See the [Cookbook]({{ site.baseurl }}/cookbook/)
+Combine these helpers to orchestrate complex flows headlessly. See the [Cookbook]({{ site.baseurl
+}}/cookbook/)
 for end-to-end examples and the source tree for implementation details.

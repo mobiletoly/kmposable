@@ -60,4 +60,3 @@ instructions inside each `sample-app-*` directory.
 - [Guides]({{ site.baseurl }}/guides/) – install, Compose integration, scripts, and testing.
 - [Cookbook]({{ site.baseurl }}/cookbook/) – real-world recipes and patterns.
 - [Reference]({{ site.baseurl }}/reference/) – API notes for core/compose/test modules.
-- [Specs]({{ site.baseurl }}/specs/) – architecture decisions and RFCs.

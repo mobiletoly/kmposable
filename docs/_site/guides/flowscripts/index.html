@@ -153,7 +153,7 @@
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/kmposable/overview/">Overview</a><a class="page-link" href="/kmposable/guides/">Guides</a><a class="page-link" href="/kmposable/reference/">Reference</a><a class="page-link" href="/kmposable/cookbook/">Cookbook</a><a class="page-link" href="/kmposable/specs/">Specs &amp; Decisions</a></div>
+        <div class="trigger"><a class="page-link" href="/kmposable/overview/">Overview</a><a class="page-link" href="/kmposable/guides/">Guides</a><a class="page-link" href="/kmposable/reference/">Reference</a><a class="page-link" href="/kmposable/cookbook/">Cookbook</a></div>
       </nav></div>
 </header>
 
@@ -272,14 +272,17 @@ outputs, emit trace logs, and finish when the story is done. They leave nodes fo
 <span class="p">)</span> <span class="p">:</span> <span class="nc">ViewModel</span><span class="p">()</span> <span class="p">{</span>
     <span class="kd">val</span> <span class="py">navFlow</span> <span class="p">=</span> <span class="nc">NavFlow</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">,</span> <span class="nc">SplashNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)).</span><span class="nf">apply</span> <span class="p">{</span> <span class="nf">start</span><span class="p">()</span> <span class="p">}</span>
 
-    <span class="k">private</span> <span class="kd">val</span> <span class="py">job</span> <span class="p">=</span> <span class="n">navFlow</span><span class="p">.</span><span class="nf">launchNavFlowScript</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">,</span> <span class="n">onTrace</span> <span class="p">=</span> <span class="p">{</span> <span class="nf">println</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">})</span> <span class="p">{</span>
-        <span class="nf">showRoot</span> <span class="p">{</span> <span class="nc">SplashNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)</span> <span class="p">}</span>
-        <span class="n">awaitOutputOfType</span><span class="p">&lt;</span><span class="nc">OnboardingOutput</span><span class="p">.</span><span class="nc">SplashFinished</span><span class="p">&gt;()</span>
+    <span class="k">private</span> <span class="kd">val</span> <span class="py">job</span> <span class="p">=</span> <span class="n">navFlow</span><span class="p">.</span><span class="nf">runFlow</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">,</span> <span class="n">onTrace</span> <span class="p">=</span> <span class="p">{</span> <span class="nf">println</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">})</span> <span class="p">{</span>
+        <span class="nf">step</span><span class="p">(</span><span class="s">"Onboarding"</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nf">showRoot</span> <span class="p">{</span> <span class="nc">SplashNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)</span> <span class="p">}</span>
+            <span class="n">awaitOutputOfType</span><span class="p">&lt;</span><span class="nc">OnboardingOutput</span><span class="p">.</span><span class="nc">SplashFinished</span><span class="p">&gt;()</span>
 
-        <span class="nf">showRoot</span> <span class="p">{</span> <span class="nc">SignInNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)</span> <span class="p">}</span>
-        <span class="k">when</span> <span class="p">(</span><span class="n">awaitOutputOfType</span><span class="p">&lt;</span><span class="nc">OnboardingOutput</span><span class="p">.</span><span class="nc">AuthResult</span><span class="p">&gt;())</span> <span class="p">{</span>
-            <span class="nc">OnboardingOutput</span><span class="p">.</span><span class="nc">AuthResult</span><span class="p">.</span><span class="nc">Success</span> <span class="p">-&gt;</span> <span class="nf">showRoot</span> <span class="p">{</span> <span class="nc">DashboardNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)</span> <span class="p">}</span>
-            <span class="k">is</span> <span class="nc">OnboardingOutput</span><span class="p">.</span><span class="nc">AuthResult</span><span class="p">.</span><span class="nc">Error</span> <span class="p">-&gt;</span> <span class="nf">showRoot</span> <span class="p">{</span> <span class="nc">ErrorNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)</span> <span class="p">}</span>
+            <span class="nf">showRoot</span> <span class="p">{</span> <span class="nc">SignInNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)</span> <span class="p">}</span>
+            <span class="k">when</span> <span class="p">(</span><span class="n">awaitOutputOfType</span><span class="p">&lt;</span><span class="nc">OnboardingOutput</span><span class="p">.</span><span class="nc">AuthResult</span><span class="p">&gt;())</span> <span class="p">{</span>
+                <span class="nc">OnboardingOutput</span><span class="p">.</span><span class="nc">AuthResult</span><span class="p">.</span><span class="nc">Success</span> <span class="p">-&gt;</span> <span class="nf">showRoot</span> <span class="p">{</span> <span class="nc">DashboardNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)</span> <span class="p">}</span>
+                <span class="k">is</span> <span class="nc">OnboardingOutput</span><span class="p">.</span><span class="nc">AuthResult</span><span class="p">.</span><span class="nc">Error</span> <span class="p">-&gt;</span> <span class="nf">showRoot</span> <span class="p">{</span> <span class="nc">ErrorNode</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">)</span> <span class="p">}</span>
+            <span class="p">}</span>
+            <span class="nf">finish</span><span class="p">()</span>
         <span class="p">}</span>
     <span class="p">}</span>
 
@@ -287,6 +290,13 @@ outputs, emit trace logs, and finish when the story is done. They leave nodes fo
         <span class="n">job</span><span class="p">.</span><span class="nf">cancel</span><span class="p">()</span>
         <span class="k">super</span><span class="p">.</span><span class="nf">onCleared</span><span class="p">()</span>
     <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div></div>
+
+<p>You can still use the lower-level entry point if you prefer:</p>
+
+<div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">val</span> <span class="py">job</span> <span class="p">=</span> <span class="n">navFlow</span><span class="p">.</span><span class="nf">launchNavFlowScript</span><span class="p">(</span><span class="n">viewModelScope</span><span class="p">,</span> <span class="n">onTrace</span> <span class="p">=</span> <span class="p">{</span> <span class="nf">println</span><span class="p">(</span><span class="n">it</span><span class="p">)</span> <span class="p">})</span> <span class="p">{</span>
+    <span class="c1">// same flow logic as above</span>
 <span class="p">}</span>
 </code></pre></div></div>
 

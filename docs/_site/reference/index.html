@@ -153,7 +153,7 @@
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/kmposable/overview/">Overview</a><a class="page-link" href="/kmposable/guides/">Guides</a><a class="page-link" href="/kmposable/reference/">Reference</a><a class="page-link" href="/kmposable/cookbook/">Cookbook</a><a class="page-link" href="/kmposable/specs/">Specs &amp; Decisions</a></div>
+        <div class="trigger"><a class="page-link" href="/kmposable/overview/">Overview</a><a class="page-link" href="/kmposable/guides/">Guides</a><a class="page-link" href="/kmposable/reference/">Reference</a><a class="page-link" href="/kmposable/cookbook/">Cookbook</a></div>
       </nav></div>
 </header>
 
@@ -306,7 +306,8 @@ custom stack entry types when you need metadata.</li>
   <li><code class="language-plaintext highlighter-rouge">KmposableStackEntry</code> / <code class="language-plaintext highlighter-rouge">DefaultStackEntry</code> – pair node with metadata; override when you need tags
 or IDs for testing/analytics.</li>
   <li><code class="language-plaintext highlighter-rouge">NavFlowScriptScope</code> – script-facing API (<code class="language-plaintext highlighter-rouge">showRoot</code>, <code class="language-plaintext highlighter-rouge">pushNode</code>, <code class="language-plaintext highlighter-rouge">replaceTop</code>, <code class="language-plaintext highlighter-rouge">awaitOutput*</code>,
-<code class="language-plaintext highlighter-rouge">trace</code>, <code class="language-plaintext highlighter-rouge">createEntry</code>). Run scripts via <code class="language-plaintext highlighter-rouge">NavFlow.launchNavFlowScript(scope, onTrace, script)</code>.</li>
+<code class="language-plaintext highlighter-rouge">trace</code>, <code class="language-plaintext highlighter-rouge">createEntry</code>). Run scripts via <code class="language-plaintext highlighter-rouge">NavFlow.runFlow(scope, onTrace) { step { … } }</code> or
+<code class="language-plaintext highlighter-rouge">NavFlow.launchNavFlowScript(scope, onTrace, script)</code>.</li>
   <li>Helpers: <code class="language-plaintext highlighter-rouge">runCatchingNodeCall</code>, <code class="language-plaintext highlighter-rouge">awaitOutputCase</code>, <code class="language-plaintext highlighter-rouge">pushForResult</code>, <code class="language-plaintext highlighter-rouge">withNode</code>, etc.</li>
 </ul>
 
@@ -317,7 +318,8 @@ or IDs for testing/analytics.</li>
   <li><code class="language-plaintext highlighter-rouge">NavFlowHost(navFlow, renderer, enableBackHandler)</code> – observes <code class="language-plaintext highlighter-rouge">navFlow.navState</code> and renders the
 top node. Automatically wires <code class="language-plaintext highlighter-rouge">KmposableBackHandler</code> unless disabled.</li>
   <li><code class="language-plaintext highlighter-rouge">nodeRenderer { register&lt;MyNode&gt; { … } }</code> – DSL mapping node types to composables.</li>
-  <li><code class="language-plaintext highlighter-rouge">KmposableBackHandler</code> – expect/actual back handling that delegates to NavFlow (Android/iOS/Desktop).</li>
+  <li><code class="language-plaintext highlighter-rouge">KmposableBackHandler</code> – expect/actual back handling that delegates to NavFlow (
+Android/iOS/Desktop).</li>
 </ul>
 
 <h2 id="testing-library-test">Testing (<code class="language-plaintext highlighter-rouge">library-test</code>)</h2>
@@ -364,7 +366,7 @@ top node. Automatically wires <code class="language-plaintext highlighter-rouge"
     </tr>
     <tr>
       <td><code class="language-plaintext highlighter-rouge">trace { … }</code></td>
-      <td>Send debug logs via <code class="language-plaintext highlighter-rouge">onTrace</code> callback passed to <code class="language-plaintext highlighter-rouge">launchNavFlowScript</code>.</td>
+      <td>Send debug logs via <code class="language-plaintext highlighter-rouge">onTrace</code> callback passed to <code class="language-plaintext highlighter-rouge">runFlow</code> / <code class="language-plaintext highlighter-rouge">launchNavFlowScript</code>.</td>
     </tr>
   </tbody>
 </table>

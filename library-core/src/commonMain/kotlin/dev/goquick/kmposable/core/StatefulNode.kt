@@ -33,7 +33,7 @@ import kotlinx.coroutines.flow.update
  * [SupervisorJob] so the rest of the app can continue running.
  * @param initialState Initial value exposed through [state].
  * @param id Optional debug identifier propagated into nav stack entries (useful in tests/logs).
- * @param outputBufferSize Extra capacity for [_outputs]. Emitting more outputs than this buffer
+ * @param outputBufferSize Extra capacity for [outputs]. Emitting more outputs than this buffer
  * allows will suspend [emitOutput] or make [tryEmitOutput] return false.
  */
 abstract class StatefulNode<STATE : Any, EVENT : Any, OUTPUT : Any>(

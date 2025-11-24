@@ -10,6 +10,10 @@ touching Compose. NavFlow scripts give you a coroutine scope that can:
 They keep your flow logic “story-like” while Compose continues to just render
 whatever NavFlow exposes.
 
+Prefer the DSL entry point for readability:
+- `navFlow.runFlow(scope) { step("name") { … } }` — staged steps, branches, cancel hooks.
+- `navFlow.launchNavFlowScript(scope) { … }` — lower-level script scope when you need full control.
+
 Looking for ready-to-use patterns? Check `docs/NAVFLOW_SCRIPT_COOKBOOK.md` for
 recipes covering common flows (onboarding, list/details/edit, retries, etc.).
 
@@ -30,6 +34,14 @@ you’d otherwise write a large output listener with branching logic.
 ## API Overview
 
 ```kotlin
+// DSL entry point (preferred)
+fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> NavFlow<OUT, ENTRY>.runFlow(
+    scope: CoroutineScope,
+    onTrace: ((String) -> Unit)? = null,
+    build: FlowScriptBuilder<OUT, ENTRY>.() -> Unit
+): Job
+
+// Lower-level entry point
 fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> NavFlow<OUT, ENTRY>.launchNavFlowScript(
     scope: CoroutineScope,
     script: suspend NavFlowScriptScope<OUT, ENTRY>.() -> Unit
@@ -124,6 +136,21 @@ withNode(factory = { ContactDetailsNode(id, scope) }) {
 
 Need to push a node, wait for a specific result, then automatically pop it?
 Use `pushForResult`:
+
+Prefer steps and named branches? The DSL variant of the above would look like:
+
+```kotlin
+navFlow.runFlow(viewModelScope) {
+    step("Login") {
+        val result = awaitOutputCase {
+            on<LoginSuccess> { it }
+            on<LoginError> { error -> error("Login failed: ${error.reason}") }
+        }
+        action { println("Logged in user ${result.userId}") }
+        finish()
+    }
+}
+```
 
 ```kotlin
 val editorResult = pushForResult(

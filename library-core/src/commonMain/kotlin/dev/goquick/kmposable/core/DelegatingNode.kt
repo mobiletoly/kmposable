@@ -19,22 +19,22 @@ import kotlinx.coroutines.flow.StateFlow
  * ```
  */
 open class DelegatingNode<STATE : Any, EVENT : Any, OUTPUT : Any>(
-    private val delegate: Node<STATE, EVENT, OUTPUT>
+    private val node: Node<STATE, EVENT, OUTPUT>
 ) : Node<STATE, EVENT, OUTPUT>, LifecycleAwareNode {
 
-    override val state: StateFlow<STATE> get() = delegate.state
+    override val state: StateFlow<STATE> get() = node.state
 
     override fun onEvent(event: EVENT) {
-        delegate.onEvent(event)
+        node.onEvent(event)
     }
 
-    override val outputs: Flow<OUTPUT> get() = delegate.outputs
+    override val outputs: Flow<OUTPUT> get() = node.outputs
 
     override fun onAttach() {
-        (delegate as? LifecycleAwareNode)?.onAttach()
+        (node as? LifecycleAwareNode)?.onAttach()
     }
 
     override fun onDetach() {
-        (delegate as? LifecycleAwareNode)?.onDetach()
+        (node as? LifecycleAwareNode)?.onDetach()
     }
 }

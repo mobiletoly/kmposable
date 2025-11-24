@@ -153,7 +153,7 @@
           </span>
         </label>
 
-        <div class="trigger"><a class="page-link" href="/kmposable/overview/">Overview</a><a class="page-link" href="/kmposable/guides/">Guides</a><a class="page-link" href="/kmposable/reference/">Reference</a><a class="page-link" href="/kmposable/cookbook/">Cookbook</a><a class="page-link" href="/kmposable/specs/">Specs &amp; Decisions</a></div>
+        <div class="trigger"><a class="page-link" href="/kmposable/overview/">Overview</a><a class="page-link" href="/kmposable/guides/">Guides</a><a class="page-link" href="/kmposable/reference/">Reference</a><a class="page-link" href="/kmposable/cookbook/">Cookbook</a></div>
       </nav></div>
 </header>
 
@@ -286,6 +286,21 @@ needed only if you render with Jetpack Compose, and <code class="language-plaint
 
 <h3 id="smallest-navflow">Smallest NavFlow</h3>
 
+<p>A NavFlow is a stack of <strong>Nodes</strong>. Each node is a tiny state machine:</p>
+
+<ul>
+  <li><code class="language-plaintext highlighter-rouge">STATE</code> – immutable UI state exposed via <code class="language-plaintext highlighter-rouge">StateFlow</code></li>
+  <li><code class="language-plaintext highlighter-rouge">EVENT</code> – inputs from UI (<code class="language-plaintext highlighter-rouge">onEvent(event)</code>)</li>
+  <li><code class="language-plaintext highlighter-rouge">OUTPUT</code> – signals sent upward (navigation/results). Use <code class="language-plaintext highlighter-rouge">Nothing</code> if the node never emits outputs.</li>
+</ul>
+
+<p>Flow of data: <strong>UI → EVENT → Node updates STATE → (optional) OUTPUT → NavFlow reacts (push/pop/replace).</strong></p>
+
+<p><code class="language-plaintext highlighter-rouge">StatefulNode&lt;STATE, EVENT, OUTPUT&gt;</code> generics map to your types: <code class="language-plaintext highlighter-rouge">STATE</code> is the immutable state
+(<code class="language-plaintext highlighter-rouge">StateFlow&lt;STATE&gt;</code>), <code class="language-plaintext highlighter-rouge">EVENT</code> is what the node accepts via <code class="language-plaintext highlighter-rouge">onEvent</code> (usually UI/user actions), and
+<code class="language-plaintext highlighter-rouge">OUTPUT</code> is what the node emits upward to a parent flow/runtime (navigation/results). Use <code class="language-plaintext highlighter-rouge">Nothing</code>
+when the node does not emit outputs.</p>
+
 <div class="language-kotlin highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kd">class</span> <span class="nc">CounterNode</span><span class="p">(</span><span class="n">parentScope</span><span class="p">:</span> <span class="nc">CoroutineScope</span><span class="p">)</span> <span class="p">:</span>
     <span class="nc">StatefulNode</span><span class="p">&lt;</span><span class="nc">CounterState</span><span class="p">,</span> <span class="nc">CounterEvent</span><span class="p">,</span> <span class="nc">Nothing</span><span class="p">&gt;(</span><span class="n">parentScope</span><span class="p">,</span> <span class="nc">CounterState</span><span class="p">())</span> <span class="p">{</span>
     <span class="k">override</span> <span class="k">fun</span> <span class="nf">onEvent</span><span class="p">(</span><span class="n">event</span><span class="p">:</span> <span class="nc">CounterEvent</span><span class="p">)</span> <span class="p">{</span>
@@ -300,6 +315,13 @@ needed only if you render with Jetpack Compose, and <code class="language-plaint
 <span class="n">navFlow</span><span class="p">.</span><span class="nf">sendEvent</span><span class="p">(</span><span class="nc">CounterEvent</span><span class="p">.</span><span class="nc">Increment</span><span class="p">)</span>
 <span class="nf">println</span><span class="p">(</span><span class="n">navFlow</span><span class="p">.</span><span class="n">navState</span><span class="p">.</span><span class="n">value</span><span class="p">.</span><span class="n">top</span><span class="p">.</span><span class="n">state</span><span class="p">.</span><span class="n">value</span><span class="p">)</span> <span class="c1">// 1</span>
 </code></pre></div></div>
+
+<p>How this reaches UI:</p>
+<ul>
+  <li>UI observes <code class="language-plaintext highlighter-rouge">node.state</code> (e.g., <code class="language-plaintext highlighter-rouge">collectAsState()</code> in Compose) and renders it.</li>
+  <li>UI sends user actions back as <code class="language-plaintext highlighter-rouge">EVENT</code>s via <code class="language-plaintext highlighter-rouge">node.onEvent(...)</code> or <code class="language-plaintext highlighter-rouge">navFlow.sendEvent(...)</code>.</li>
+  <li>If a node emits <code class="language-plaintext highlighter-rouge">OUTPUT</code>, NavFlow (or a parent) uses it to navigate or surface results.</li>
+</ul>
 
 <h2 id="2-compose-integration">2. Compose Integration</h2>
 

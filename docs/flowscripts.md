@@ -15,14 +15,17 @@ class OnboardingViewModel(
 ) : ViewModel() {
     val navFlow = NavFlow(viewModelScope, SplashNode(viewModelScope)).apply { start() }
 
-    private val job = navFlow.launchNavFlowScript(viewModelScope, onTrace = { println(it) }) {
-        showRoot { SplashNode(viewModelScope) }
-        awaitOutputOfType<OnboardingOutput.SplashFinished>()
+    private val job = navFlow.runFlow(viewModelScope, onTrace = { println(it) }) {
+        step("Onboarding") {
+            showRoot { SplashNode(viewModelScope) }
+            awaitOutputOfType<OnboardingOutput.SplashFinished>()
 
-        showRoot { SignInNode(viewModelScope) }
-        when (awaitOutputOfType<OnboardingOutput.AuthResult>()) {
-            OnboardingOutput.AuthResult.Success -> showRoot { DashboardNode(viewModelScope) }
-            is OnboardingOutput.AuthResult.Error -> showRoot { ErrorNode(viewModelScope) }
+            showRoot { SignInNode(viewModelScope) }
+            when (awaitOutputOfType<OnboardingOutput.AuthResult>()) {
+                OnboardingOutput.AuthResult.Success -> showRoot { DashboardNode(viewModelScope) }
+                is OnboardingOutput.AuthResult.Error -> showRoot { ErrorNode(viewModelScope) }
+            }
+            finish()
         }
     }
 
@@ -30,6 +33,14 @@ class OnboardingViewModel(
         job.cancel()
         super.onCleared()
     }
+}
+```
+
+You can still use the lower-level entry point if you prefer:
+
+```kotlin
+val job = navFlow.launchNavFlowScript(viewModelScope, onTrace = { println(it) }) {
+    // same flow logic as above
 }
 ```
 

@@ -27,6 +27,19 @@ needed only if you render with Jetpack Compose, and `test` pulls in `FlowTestSce
 
 ### Smallest NavFlow
 
+A NavFlow is a stack of **Nodes**. Each node is a tiny state machine:
+
+- `STATE` – immutable UI state exposed via `StateFlow`
+- `EVENT` – inputs from UI (`onEvent(event)`)
+- `OUTPUT` – signals sent upward (navigation/results). Use `Nothing` if the node never emits outputs.
+
+Flow of data: **UI → EVENT → Node updates STATE → (optional) OUTPUT → NavFlow reacts (push/pop/replace).**
+
+`StatefulNode<STATE, EVENT, OUTPUT>` generics map to your types: `STATE` is the immutable state
+(`StateFlow<STATE>`), `EVENT` is what the node accepts via `onEvent` (usually UI/user actions), and
+`OUTPUT` is what the node emits upward to a parent flow/runtime (navigation/results). Use `Nothing`
+when the node does not emit outputs.
+
 ```kotlin
 class CounterNode(parentScope: CoroutineScope) :
     StatefulNode<CounterState, CounterEvent, Nothing>(parentScope, CounterState()) {
@@ -42,6 +55,11 @@ val navFlow = NavFlow(appScope = scope, rootNode = CounterNode(scope)).apply { s
 navFlow.sendEvent(CounterEvent.Increment)
 println(navFlow.navState.value.top.state.value) // 1
 ```
+
+How this reaches UI:
+- UI observes `node.state` (e.g., `collectAsState()` in Compose) and renders it.
+- UI sends user actions back as `EVENT`s via `node.onEvent(...)` or `navFlow.sendEvent(...)`.
+- If a node emits `OUTPUT`, NavFlow (or a parent) uses it to navigate or surface results.
 
 ## 2. Compose Integration
 

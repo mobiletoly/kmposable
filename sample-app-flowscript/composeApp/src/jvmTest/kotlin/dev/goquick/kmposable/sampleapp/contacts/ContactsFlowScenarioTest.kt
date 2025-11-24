@@ -1,8 +1,6 @@
 package dev.goquick.kmposable.sampleapp.contacts
 
 import dev.goquick.kmposable.runtime.SimpleNavFlowFactory
-import dev.goquick.kmposable.sampleapp.contacts.createContactsNavFlow
-import dev.goquick.kmposable.sampleapp.contacts.runContactsFlowScript
 import dev.goquick.kmposable.test.createTestScenario
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -21,9 +19,11 @@ class ContactsFlowScenarioTest {
         }
 
         val scenario = factory.createTestScenario(this).start()
-        val scriptJob = scenario.launchScript {
-            runContactsFlowScript(repository, this@runTest)
-        }
+        val scriptJob = scenario.navFlow.launchContactsScript(
+            scriptScope = this,
+            nodeScope = this,
+            repository = repository
+        )
         advanceUntilIdle()
 
         scenario.send(ContactsListEvent.ContactClicked(contact.id))
@@ -43,9 +43,11 @@ class ContactsFlowScenarioTest {
         }
 
         val scenario = factory.createTestScenario(this).start()
-        val scriptJob = scenario.launchScript {
-            runContactsFlowScript(repository, this@runTest)
-        }
+        val scriptJob = scenario.navFlow.launchContactsScript(
+            scriptScope = this,
+            nodeScope = this,
+            repository = repository
+        )
         advanceUntilIdle()
 
         scenario.send(ContactsListEvent.ContactClicked(contact.id))

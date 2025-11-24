@@ -74,7 +74,7 @@ fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> NavFlow<OUT, ENTRY>.launchNavF
     script: suspend NavFlowScriptScope<OUT, ENTRY>.() -> Unit
 ): Job {
     val scriptScope = DefaultNavFlowScriptScope(this, scope, onTrace)
-    return scope.launch {
+    return scope.launch(start = CoroutineStart.UNDISPATCHED) {
         try {
             scriptScope.script()
         } finally {
