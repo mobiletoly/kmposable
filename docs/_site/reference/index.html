@@ -315,8 +315,8 @@ custom stack entry types when you need metadata.</li>
 or IDs for testing/analytics.</li>
   <li><code class="language-plaintext highlighter-rouge">NavDiff</code> / <code class="language-plaintext highlighter-rouge">diffNavState</code> – structural diff between nav states (pushed/popped entries).</li>
   <li><code class="language-plaintext highlighter-rouge">NavFlowScriptScope</code> – script-facing API (<code class="language-plaintext highlighter-rouge">showRoot</code>, <code class="language-plaintext highlighter-rouge">pushNode</code>, <code class="language-plaintext highlighter-rouge">replaceTop</code>, <code class="language-plaintext highlighter-rouge">awaitOutput*</code>,
-<code class="language-plaintext highlighter-rouge">trace</code>, <code class="language-plaintext highlighter-rouge">createEntry</code>). Run scripts via <code class="language-plaintext highlighter-rouge">NavFlow.runFlow(scope, onTrace) { step { … } }</code> or
-<code class="language-plaintext highlighter-rouge">NavFlow.launchNavFlowScript(scope, onTrace, script)</code>.</li>
+<code class="language-plaintext highlighter-rouge">trace</code>, <code class="language-plaintext highlighter-rouge">createEntry</code>, <code class="language-plaintext highlighter-rouge">navState</code>). Run scripts via <code class="language-plaintext highlighter-rouge">NavFlow.launchNavFlowScript(scope, onTrace, script)</code>
+or the <code class="language-plaintext highlighter-rouge">runScript</code> alias (SimpleNavFlow variants provided).</li>
   <li>Helpers: <code class="language-plaintext highlighter-rouge">runCatchingNodeCall</code>, <code class="language-plaintext highlighter-rouge">awaitOutputCase</code>, <code class="language-plaintext highlighter-rouge">pushForResult</code>, <code class="language-plaintext highlighter-rouge">withNode</code>, etc.</li>
 </ul>
 
@@ -366,8 +366,8 @@ Android/iOS/Desktop).</li>
       <td>Wait for future outputs.</td>
     </tr>
     <tr>
-      <td><code class="language-plaintext highlighter-rouge">pushForResult</code>, <code class="language-plaintext highlighter-rouge">withNode</code></td>
-      <td>Push a temporary node for a block/result and pop automatically.</td>
+      <td><code class="language-plaintext highlighter-rouge">pushForResult</code>, <code class="language-plaintext highlighter-rouge">withNode</code>, <code class="language-plaintext highlighter-rouge">updateTopNode</code></td>
+      <td>Push a temporary node for a block/result, pop automatically, or act on the top node.</td>
     </tr>
     <tr>
       <td><code class="language-plaintext highlighter-rouge">runCatchingNodeCall</code></td>
@@ -375,7 +375,7 @@ Android/iOS/Desktop).</li>
     </tr>
     <tr>
       <td><code class="language-plaintext highlighter-rouge">trace { … }</code></td>
-      <td>Send debug logs via <code class="language-plaintext highlighter-rouge">onTrace</code> callback passed to <code class="language-plaintext highlighter-rouge">runFlow</code> / <code class="language-plaintext highlighter-rouge">launchNavFlowScript</code>.</td>
+      <td>Send debug logs via <code class="language-plaintext highlighter-rouge">onTrace</code> callback passed to <code class="language-plaintext highlighter-rouge">runScript</code> / <code class="language-plaintext highlighter-rouge">launchNavFlowScript</code>.</td>
     </tr>
   </tbody>
 </table>

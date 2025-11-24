@@ -30,8 +30,8 @@ repository – each section below links to source directories.
   or IDs for testing/analytics.
 - `NavDiff` / `diffNavState` – structural diff between nav states (pushed/popped entries).
 - `NavFlowScriptScope` – script-facing API (`showRoot`, `pushNode`, `replaceTop`, `awaitOutput*`,
-  `trace`, `createEntry`). Run scripts via `NavFlow.runFlow(scope, onTrace) { step { … } }` or
-  `NavFlow.launchNavFlowScript(scope, onTrace, script)`.
+  `trace`, `createEntry`, `navState`). Run scripts via `NavFlow.launchNavFlowScript(scope, onTrace, script)`
+  or the `runScript` alias (SimpleNavFlow variants provided).
 - Helpers: `runCatchingNodeCall`, `awaitOutputCase`, `pushForResult`, `withNode`, etc.
 
 ## Compose Adapters (`library-compose`)
@@ -63,9 +63,9 @@ Factory helpers: `NavFlowFactory.createTestScenario(scope)` builds a new runtime
 |-------------------------------------------------------------|-------------------------------------------------------------------------------------|
 | `showRoot`, `pushNode`, `replaceTop`                        | Stack operations without dealing with entries.                                      |
 | `awaitOutputOfType`, `awaitOutputCase`, `awaitMappedOutput` | Wait for future outputs.                                                            |
-| `pushForResult`, `withNode`                                 | Push a temporary node for a block/result and pop automatically.                     |
+| `pushForResult`, `withNode`, `updateTopNode`                | Push a temporary node for a block/result, pop automatically, or act on the top node.|
 | `runCatchingNodeCall`                                       | Display loading/success/error state while running suspending work.                  |
-| `trace { … }`                                               | Send debug logs via `onTrace` callback passed to `runFlow` / `launchNavFlowScript`. |
+| `trace { … }`                                               | Send debug logs via `onTrace` callback passed to `runScript` / `launchNavFlowScript`.|
 
 Combine these helpers to orchestrate complex flows headlessly. See the [Cookbook]({{ site.baseurl
 }}/cookbook/)

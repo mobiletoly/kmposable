@@ -23,19 +23,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.goquick.kmposable.compose.NavFlowHost
-import dev.goquick.kmposable.compose.NodeRenderer
 import dev.goquick.kmposable.compose.nodeRenderer
 import dev.goquick.kmposable.compose.rememberNavFlow
 import dev.goquick.kmposable.sampleapp.contacts.Contact
-import dev.goquick.kmposable.sampleapp.contacts.ContactDetailsNode
 import dev.goquick.kmposable.sampleapp.contacts.ContactId
 import dev.goquick.kmposable.sampleapp.contacts.ContactsFlowEvent
 import dev.goquick.kmposable.sampleapp.contacts.ContactsListNode
 import dev.goquick.kmposable.sampleapp.contacts.ContactsNavFlow
-import dev.goquick.kmposable.sampleapp.contacts.EditContactNode
-import dev.goquick.kmposable.sampleapp.contacts.EditContactEffect
 import dev.goquick.kmposable.sampleapp.contacts.InMemoryContactsRepository
-import dev.goquick.kmposable.sampleapp.contacts.ContactDetailsEffect
 import dev.goquick.kmposable.sampleapp.contacts.ui.ContactDetailsScreen
 import dev.goquick.kmposable.sampleapp.contacts.ui.ContactsListScreen
 import dev.goquick.kmposable.sampleapp.contacts.ui.EditContactScreen
@@ -81,62 +76,17 @@ private fun ContactsDestination(
     val navFlow = rememberNavFlow(key = repository) { scope ->
         ContactsNavFlow(repository = repository, appScope = scope)
     }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val effectScope = rememberCoroutineScope()
 
-    val renderer: NodeRenderer<ContactsFlowEvent> = remember {
+    val renderer = remember {
         nodeRenderer {
             register<ContactsListNode> { node ->
                 val state by node.state.collectAsState()
                 ContactsListScreen(state = state, onEvent = node::onEvent)
             }
-            register<ContactDetailsNode> { node ->
-                val state by node.state.collectAsState()
-                val latestSnackbarHost = rememberUpdatedState(snackbarHostState)
-                androidx.compose.runtime.DisposableEffect(node) {
-                    val job = effectScope.launch {
-                        node.effects.collect { effect ->
-                            when (effect) {
-                                is ContactDetailsEffect.ShowMessage -> {
-                                    effectScope.launch {
-                                        latestSnackbarHost.value.showSnackbar(effect.text)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    onDispose { job.cancel() }
-                }
-                ContactDetailsScreen(state = state, onEvent = node::onEvent)
-            }
-            register<EditContactNode> { node ->
-                val state by node.state.collectAsState()
-                val latestSnackbarHost = rememberUpdatedState(snackbarHostState)
-                androidx.compose.runtime.DisposableEffect(node) {
-                    val job = effectScope.launch {
-                        node.effects.collect { effect ->
-                            when (effect) {
-                                is EditContactEffect.ShowMessage -> {
-                                    effectScope.launch {
-                                        latestSnackbarHost.value.showSnackbar(effect.text)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    onDispose { job.cancel() }
-                }
-                EditContactScreen(
-                    state = state,
-                    onEvent = node::onEvent,
-                    snackbarHostState = snackbarHostState
-                )
-            }
         }
     }
 
     NavFlowHost(navFlow = navFlow, renderer = renderer)
-    SnackbarHost(hostState = snackbarHostState)
 }
 
 @Composable

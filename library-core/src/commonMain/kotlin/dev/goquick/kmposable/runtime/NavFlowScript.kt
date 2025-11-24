@@ -1,6 +1,8 @@
 package dev.goquick.kmposable.runtime
 
 import dev.goquick.kmposable.core.Node
+import dev.goquick.kmposable.core.nav.DefaultStackEntry
+import dev.goquick.kmposable.core.nav.KmposableNavState
 import dev.goquick.kmposable.core.nav.KmposableNavigator
 import dev.goquick.kmposable.core.nav.KmposableStackEntry
 import kotlinx.coroutines.CancellationException
@@ -9,10 +11,14 @@ import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlin.jvm.JvmName
 
 /**
- * Scope used by NavFlow scripts to coordinate navigation changes and await node outputs.
+ * Primary scripting surface for driving a [NavFlow] sequentially. Prefer using its helpers
+ * (showRoot, pushNode, awaitOutput*, trace) instead of mutating the navigator directly unless you
+ * have an advanced use case.
  */
 interface NavFlowScriptScope<OUT : Any, ENTRY : KmposableStackEntry<OUT>> {
     /** Flow being orchestrated. */
@@ -20,6 +26,10 @@ interface NavFlowScriptScope<OUT : Any, ENTRY : KmposableStackEntry<OUT>> {
 
     /** Underlying navigator that powers this flow. */
     val navigator: KmposableNavigator<OUT, ENTRY>
+
+    /** Convenience access to the navigation state. */
+    val navState: StateFlow<KmposableNavState<OUT, ENTRY>>
+        get() = navFlow.navState
 
     /** Convenience hook to mutate the navigator stack. */
     fun showNode(block: KmposableNavigator<OUT, ENTRY>.() -> Unit) {
@@ -82,6 +92,28 @@ fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> NavFlow<OUT, ENTRY>.launchNavF
         }
     }
 }
+
+/**
+ * Readability alias for [launchNavFlowScript].
+ */
+@JvmName("runScriptForNavFlow")
+fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> NavFlow<OUT, ENTRY>.runScript(
+    scope: CoroutineScope,
+    onTrace: ((String) -> Unit)? = null,
+    block: suspend NavFlowScriptScope<OUT, ENTRY>.() -> Unit
+): Job = launchNavFlowScript(scope, onTrace, block)
+
+typealias SimpleNavFlowScriptScope<OUT> = NavFlowScriptScope<OUT, DefaultStackEntry<OUT>>
+
+/**
+ * Convenience alias for running scripts against [SimpleNavFlow].
+ */
+@JvmName("runScriptForSimpleNavFlow")
+fun <OUT : Any> SimpleNavFlow<OUT>.runScript(
+    scope: CoroutineScope,
+    onTrace: ((String) -> Unit)? = null,
+    block: suspend SimpleNavFlowScriptScope<OUT>.() -> Unit
+): Job = launchNavFlowScript(scope, onTrace, block)
 
 private class DefaultNavFlowScriptScope<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     override val navFlow: NavFlow<OUT, ENTRY>,

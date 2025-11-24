@@ -15,5 +15,5 @@ loading are driven entirely by a NavFlow script.
 - Repository + nodes: same package as the script
 
 Pair this README with `README-NAVFLOWSCRIPT.md` and `docs/NAVFLOW_SCRIPT_COOKBOOK.md`
-for deeper context. The contacts flow now uses the `runFlow { step { ... } }` DSL built on
+for deeper context. The contacts flow now uses `runScript { ... }` with
 `NavFlowScriptScope`, so it reads like a sequential story instead of manual coroutine wiring.

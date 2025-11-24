@@ -132,3 +132,27 @@ suspend fun <NodeT : Node<*, *, OUT>, OUT : Any, Result : Any> NavFlowScriptScop
         navFlow.pop()
     }
 }
+
+/**
+ * Runs [block] against the current top node, throwing if it is not of type [T].
+ */
+suspend inline fun <OUT : Any, reified T : Node<*, *, OUT>> NavFlowScriptScope<OUT, *>.updateTopNode(
+    noinline block: suspend T.() -> Unit
+) {
+    val node = navFlow.currentTopNode()
+    val typed = node as? T
+        ?: error("Expected top node of type ${T::class.simpleName}, but was ${node::class.simpleName}")
+    block(typed)
+}
+
+/**
+ * Retrieves the current top node as [T], executes [block], and returns its result.
+ */
+suspend inline fun <OUT : Any, reified T : Node<*, *, OUT>, R> NavFlowScriptScope<OUT, *>.withTopNode(
+    noinline block: suspend T.() -> R
+): R {
+    val node = navFlow.currentTopNode()
+    val typed = node as? T
+        ?: error("Expected top node of type ${T::class.simpleName}, but was ${node::class.simpleName}")
+    return block(typed)
+}

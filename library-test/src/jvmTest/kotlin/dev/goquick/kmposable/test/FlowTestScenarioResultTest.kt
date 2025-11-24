@@ -8,16 +8,16 @@ import dev.goquick.kmposable.runtime.SimpleNavFlowFactory
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.test.advanceUntilIdle
-import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.yield
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class FlowTestScenarioResultTest {
 
     @Test
-    fun awaitTopResultReturnsOk() = runTest {
+    fun awaitTopResultReturnsOk() = runBlocking {
         val factory = SimpleNavFlowFactory<ResultOutput> {
             NavFlow(
                 appScope = this,
@@ -26,21 +26,23 @@ class FlowTestScenarioResultTest {
         }
 
         val scenario = factory.createTestScenario(this).start()
-        advanceUntilIdle()
+        try {
+            val awaiting = async { scenario.awaitTopResult<ResultOutput>() }
 
-        // Emit result
-        val top = scenario.navFlow.currentTopNode() as ResultNodeStub
-        top.emit(KmposableResult.Ok(ResultOutput("done")))
+            yield() // let awaitTopResult start collecting
+            val top = scenario.navFlow.currentTopNode() as ResultNodeStub
+            top.emit(KmposableResult.Ok(ResultOutput("done")))
 
-        val result = scenario.awaitTopResult<ResultOutput>()
-        assertIs<KmposableResult.Ok<ResultOutput>>(result)
-        assertEquals("done", result.value.payload)
-
-        scenario.finish()
+            val result = withTimeout(2_000) { awaiting.await() }
+            assertIs<KmposableResult.Ok<ResultOutput>>(result)
+            assertEquals("done", result.value.payload)
+        } finally {
+            scenario.finish()
+        }
     }
 
     @Test
-    fun awaitTopResultReturnsCanceledWhenNodeRemoved() = runTest {
+    fun awaitTopResultReturnsCanceledWhenNodeRemoved() = runBlocking {
         val factory = SimpleNavFlowFactory<ResultOutput> {
             NavFlow(
                 appScope = this,
@@ -49,12 +51,16 @@ class FlowTestScenarioResultTest {
         }
 
         val scenario = factory.createTestScenario(this).start()
-        advanceUntilIdle()
+        try {
+            val awaiting = async { scenario.awaitTopResult<ResultOutput>() }
 
-        scenario.pop()
-        val result = scenario.awaitTopResult<ResultOutput>()
-        assertEquals(KmposableResult.Canceled, result)
-        scenario.finish()
+            yield() // let awaitTopResult start collecting
+            scenario.navFlow.replaceTop(NonResultNode(this))
+            val result = withTimeout(2_000) { awaiting.await() }
+            assertEquals(KmposableResult.Canceled, result)
+        } finally {
+            scenario.finish()
+        }
     }
 
     private data class ResultOutput(val payload: String)
@@ -62,11 +68,16 @@ class FlowTestScenarioResultTest {
     private class ResultNodeStub(
         parentScope: kotlinx.coroutines.CoroutineScope
     ) : StatefulNode<Unit, Unit, ResultOutput>(parentScope, Unit), ResultNode<ResultOutput> {
-        private val resultFlow = MutableSharedFlow<KmposableResult<ResultOutput>>(extraBufferCapacity = 1)
+        private val resultFlow = MutableSharedFlow<KmposableResult<ResultOutput>>(replay = 1)
         override val result = resultFlow
         override fun onEvent(event: Unit) = Unit
         suspend fun emit(result: KmposableResult<ResultOutput>) {
             resultFlow.emit(result)
         }
+    }
+
+    private class NonResultNode(parentScope: kotlinx.coroutines.CoroutineScope) :
+        StatefulNode<Unit, Unit, ResultOutput>(parentScope, Unit) {
+        override fun onEvent(event: Unit) = Unit
     }
 }

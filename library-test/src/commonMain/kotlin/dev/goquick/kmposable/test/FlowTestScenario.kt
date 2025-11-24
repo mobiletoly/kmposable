@@ -15,23 +15,25 @@
  */
 package dev.goquick.kmposable.test
 
-import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.core.KmposableResult
+import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.core.ResultNode
 import dev.goquick.kmposable.core.nav.KmposableStackEntry
-import dev.goquick.kmposable.runtime.NavFlowFactory
 import dev.goquick.kmposable.runtime.NavFlow
+import dev.goquick.kmposable.runtime.NavFlowFactory
 import dev.goquick.kmposable.runtime.NavFlowScriptScope
 import dev.goquick.kmposable.runtime.launchNavFlowScript
-import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancelAndJoin
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Test harness that drives a [NavFlow] without rendering UI.
@@ -223,21 +225,26 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     suspend inline fun <reified RESULT : Any> awaitTopResult(
         timeoutMillis: Long = 1_000
     ): KmposableResult<RESULT> {
-        val deadline = System.currentTimeMillis() + timeoutMillis
         val top = navFlow.currentTopNode()
         val resultNode = top as? ResultNode<RESULT>
             ?: error("Top node is not a ResultNode<${RESULT::class.simpleName}>")
 
-        while (true) {
-            val next: KmposableResult<RESULT> = resultNode.result.first()
-            return next
-            if (navFlow.navState.value.stack.none { it.node == top }) {
-                return KmposableResult.Canceled
-            }
-            if (System.currentTimeMillis() > deadline) {
-                error("Timed out waiting for result from ${top::class.simpleName}")
-            }
-            kotlinx.coroutines.yield()
+        return withTimeout(timeoutMillis) {
+            channelFlow {
+                val resultJob = launch(start = CoroutineStart.UNDISPATCHED) {
+                    resultNode.result.collect { send(it) }
+                }
+                val removalJob = launch(start = CoroutineStart.UNDISPATCHED) {
+                    navFlow.navState
+                        .filter { state -> state.stack.none { it.node == top } }
+                        .first()
+                    send(KmposableResult.Canceled)
+                }
+                awaitClose {
+                    resultJob.cancel()
+                    removalJob.cancel()
+                }
+            }.first()
         }
     }
 }

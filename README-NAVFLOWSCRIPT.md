@@ -10,9 +10,9 @@ touching Compose. NavFlow scripts give you a coroutine scope that can:
 They keep your flow logic “story-like” while Compose continues to just render
 whatever NavFlow exposes.
 
-Prefer the DSL entry point for readability:
-- `navFlow.runFlow(scope) { step("name") { … } }` — staged steps, branches, cancel hooks.
-- `navFlow.launchNavFlowScript(scope) { … }` — lower-level script scope when you need full control.
+Use the script scope directly:
+- `navFlow.launchNavFlowScript(scope) { … }` — primary script entry point.
+- `navFlow.runScript(scope) { … }` — alias for `launchNavFlowScript`.
 
 Looking for ready-to-use patterns? Check `docs/NAVFLOW_SCRIPT_COOKBOOK.md` for
 recipes covering common flows (onboarding, list/details/edit, retries, etc.).
@@ -34,14 +34,14 @@ you’d otherwise write a large output listener with branching logic.
 ## API Overview
 
 ```kotlin
-// DSL entry point (preferred)
-fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> NavFlow<OUT, ENTRY>.runFlow(
+// Preferred entry point (alias)
+fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> NavFlow<OUT, ENTRY>.runScript(
     scope: CoroutineScope,
     onTrace: ((String) -> Unit)? = null,
-    build: FlowScriptBuilder<OUT, ENTRY>.() -> Unit
+    block: suspend NavFlowScriptScope<OUT, ENTRY>.() -> Unit
 ): Job
 
-// Lower-level entry point
+// Primary entry point
 fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>> NavFlow<OUT, ENTRY>.launchNavFlowScript(
     scope: CoroutineScope,
     script: suspend NavFlowScriptScope<OUT, ENTRY>.() -> Unit
@@ -54,6 +54,7 @@ Inside the script:
 interface NavFlowScriptScope<OUT : Any, ENTRY : KmposableStackEntry<OUT>> {
     val navFlow: NavFlow<OUT, ENTRY>
     val navigator: KmposableNavigator<OUT, ENTRY>
+    val navState: StateFlow<KmposableNavState<OUT, ENTRY>>
 
     fun showNode(block: KmposableNavigator<OUT, ENTRY>.() -> Unit)
     fun showRoot(factory: () -> Node<*, *, OUT>)
@@ -133,24 +134,10 @@ There’s also an overload that takes a factory lambda if you prefer:
 withNode(factory = { ContactDetailsNode(id, scope) }) {
     // same as above
 }
+```
 
 Need to push a node, wait for a specific result, then automatically pop it?
 Use `pushForResult`:
-
-Prefer steps and named branches? The DSL variant of the above would look like:
-
-```kotlin
-navFlow.runFlow(viewModelScope) {
-    step("Login") {
-        val result = awaitOutputCase {
-            on<LoginSuccess> { it }
-            on<LoginError> { error -> error("Login failed: ${error.reason}") }
-        }
-        action { println("Logged in user ${result.userId}") }
-        finish()
-    }
-}
-```
 
 ```kotlin
 val editorResult = pushForResult(
@@ -167,6 +154,24 @@ val editorResult = pushForResult(
 
 It covers the common “push → run sub-flow → pop” navigation macro while keeping
 the mapper strongly typed.
+
+If the result needs to be applied to the current top node, pair it with
+`updateTopNode`:
+
+```kotlin
+val pickedId: String = pushForResult(
+    factory = { PickerNode(scope) },
+    mapper = { output ->
+        when (output) {
+            is PickerOutput.Picked -> output.id
+            else -> null
+        }
+    }
+)
+
+updateTopNode<ProfileNode> {
+    onItemPicked(pickedId)
+}
 ```
 
 ---

@@ -129,7 +129,7 @@ fun CounterScreen() {
 ```
 
 Tests reuse the exact same flow via `SimpleNavFlowFactory` + `FlowTestScenario`. Scripts reuse it via
-`navFlow.launchNavFlowScript { … }` or the DSL-friendly `navFlow.runFlow { step("name") { … } }`.
+`navFlow.runScript { … }` (alias for `launchNavFlowScript`).
 See the docs for full walkthroughs.
 
 # Samples
