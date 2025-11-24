@@ -1,13 +1,17 @@
 package dev.goquick.kmposable.sampleapp.contacts
 
-import dev.goquick.kmposable.core.StatefulNode
+import dev.goquick.kmposable.core.EffectfulStatefulNode
 import kotlinx.coroutines.launch
+
+sealed interface ContactDetailsEffect {
+    data class ShowMessage(val text: String) : ContactDetailsEffect
+}
 
 class ContactDetailsNode(
     private val contactId: ContactId,
     private val repository: ContactsRepository,
     parentScope: kotlinx.coroutines.CoroutineScope
-) : StatefulNode<ContactDetailsState, ContactDetailsEvent, ContactsFlowEvent>(
+) : EffectfulStatefulNode<ContactDetailsState, ContactDetailsEvent, ContactsFlowEvent, ContactDetailsEffect>(
     parentScope = parentScope,
     initialState = ContactDetailsState(isLoading = true)
 ) {
@@ -25,6 +29,7 @@ class ContactDetailsNode(
                 emitOutput(ContactsFlowEvent.OpenEditor(contact))
             }
             ContactDetailsEvent.DeleteClicked -> scope.launch {
+                emitEffect(ContactDetailsEffect.ShowMessage("Deleted"))
                 emitOutput(ContactsFlowEvent.DeleteContact(contactId))
             }
             ContactDetailsEvent.BackClicked -> scope.launch {
@@ -48,6 +53,7 @@ class ContactDetailsNode(
             updateState {
                 it.copy(isLoading = false, error = t.message ?: "Unable to load contact")
             }
+            emitEffect(ContactDetailsEffect.ShowMessage("Unable to load contact"))
         }
     }
 }

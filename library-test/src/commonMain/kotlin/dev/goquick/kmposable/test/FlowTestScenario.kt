@@ -16,6 +16,8 @@
 package dev.goquick.kmposable.test
 
 import dev.goquick.kmposable.core.Node
+import dev.goquick.kmposable.core.KmposableResult
+import dev.goquick.kmposable.core.ResultNode
 import dev.goquick.kmposable.core.nav.KmposableStackEntry
 import dev.goquick.kmposable.runtime.NavFlowFactory
 import dev.goquick.kmposable.runtime.NavFlow
@@ -213,6 +215,31 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     suspend inline fun <reified T : OUT> awaitOutputOfType(
         timeoutMillis: Long = 1_000
     ): T = awaitMappedOutput(timeoutMillis) { output -> output as? T }
+
+    /**
+     * Awaits a typed result from a [ResultNode] currently on top of the stack. If the node leaves
+     * the stack before producing a result, returns [KmposableResult.Canceled].
+     */
+    suspend inline fun <reified RESULT : Any> awaitTopResult(
+        timeoutMillis: Long = 1_000
+    ): KmposableResult<RESULT> {
+        val deadline = System.currentTimeMillis() + timeoutMillis
+        val top = navFlow.currentTopNode()
+        val resultNode = top as? ResultNode<RESULT>
+            ?: error("Top node is not a ResultNode<${RESULT::class.simpleName}>")
+
+        while (true) {
+            val next: KmposableResult<RESULT> = resultNode.result.first()
+            return next
+            if (navFlow.navState.value.stack.none { it.node == top }) {
+                return KmposableResult.Canceled
+            }
+            if (System.currentTimeMillis() > deadline) {
+                error("Timed out waiting for result from ${top::class.simpleName}")
+            }
+            kotlinx.coroutines.yield()
+        }
+    }
 }
 
 /** Creates a [FlowTestScenario] from a [NavFlowFactory] for convenient use in tests. */

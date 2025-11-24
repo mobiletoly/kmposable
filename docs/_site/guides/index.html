@@ -386,6 +386,8 @@ consume internal back events.</li>
   <li><strong>DI/ViewModels</strong> – combine <code class="language-plaintext highlighter-rouge">rememberNavFlow</code> with your DI container; no Android-specific
 dependencies required.</li>
   <li><strong>Tracing</strong> – feed <code class="language-plaintext highlighter-rouge">onTrace</code> into scripts to integrate with analytics or loggers.</li>
+  <li><strong>Side effects</strong> – implement <code class="language-plaintext highlighter-rouge">EffectSource</code> or extend <code class="language-plaintext highlighter-rouge">EffectfulStatefulNode</code> when you need a
+one-off effects stream (analytics, toasts) separate from navigation outputs.</li>
 </ul>
 
 <p>For scripts specifically, see <a href="/kmposable/guides/flowscripts/">NavFlow Scripts</a> and the

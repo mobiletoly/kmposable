@@ -291,6 +291,14 @@ repository – each section below links to source directories.</p>
       <td><code class="language-plaintext highlighter-rouge">DelegatingNode</code></td>
       <td>Wraps another node and delegates everything by default – override only the parts you need (e.g., map outputs).</td>
     </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">EffectSource</code> / <code class="language-plaintext highlighter-rouge">EffectfulStatefulNode</code></td>
+      <td>Opt-in effects channel for one-off side effects (analytics, toasts, etc.) separate from outputs.</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">ResultNode</code>, <code class="language-plaintext highlighter-rouge">KmposableResult</code></td>
+      <td>Opt-in “start for result” contract; nodes emit typed results independent of outputs.</td>
+    </tr>
   </tbody>
 </table>
 
@@ -305,6 +313,7 @@ custom stack entry types when you need metadata.</li>
   <li><code class="language-plaintext highlighter-rouge">KmposableNavState</code> – snapshot with <code class="language-plaintext highlighter-rouge">stack</code>, <code class="language-plaintext highlighter-rouge">top</code>, <code class="language-plaintext highlighter-rouge">root</code>, <code class="language-plaintext highlighter-rouge">size</code> accessors.</li>
   <li><code class="language-plaintext highlighter-rouge">KmposableStackEntry</code> / <code class="language-plaintext highlighter-rouge">DefaultStackEntry</code> – pair node with metadata; override when you need tags
 or IDs for testing/analytics.</li>
+  <li><code class="language-plaintext highlighter-rouge">NavDiff</code> / <code class="language-plaintext highlighter-rouge">diffNavState</code> – structural diff between nav states (pushed/popped entries).</li>
   <li><code class="language-plaintext highlighter-rouge">NavFlowScriptScope</code> – script-facing API (<code class="language-plaintext highlighter-rouge">showRoot</code>, <code class="language-plaintext highlighter-rouge">pushNode</code>, <code class="language-plaintext highlighter-rouge">replaceTop</code>, <code class="language-plaintext highlighter-rouge">awaitOutput*</code>,
 <code class="language-plaintext highlighter-rouge">trace</code>, <code class="language-plaintext highlighter-rouge">createEntry</code>). Run scripts via <code class="language-plaintext highlighter-rouge">NavFlow.runFlow(scope, onTrace) { step { … } }</code> or
 <code class="language-plaintext highlighter-rouge">NavFlow.launchNavFlowScript(scope, onTrace, script)</code>.</li>

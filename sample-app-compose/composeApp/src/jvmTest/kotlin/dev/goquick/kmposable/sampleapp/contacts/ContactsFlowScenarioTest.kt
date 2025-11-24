@@ -2,10 +2,12 @@ package dev.goquick.kmposable.sampleapp.contacts
 
 import dev.goquick.kmposable.runtime.SimpleNavFlowFactory
 import dev.goquick.kmposable.test.createTestScenario
+import dev.goquick.kmposable.core.KmposableResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
+import kotlin.test.assertIs
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ContactsFlowScenarioTest {

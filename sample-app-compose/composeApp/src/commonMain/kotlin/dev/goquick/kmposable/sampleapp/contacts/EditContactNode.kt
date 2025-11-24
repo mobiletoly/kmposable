@@ -1,23 +1,33 @@
 package dev.goquick.kmposable.sampleapp.contacts
 
-import dev.goquick.kmposable.core.StatefulNode
+import dev.goquick.kmposable.core.EffectfulStatefulNode
+import dev.goquick.kmposable.core.KmposableResult
+import dev.goquick.kmposable.core.ResultNode
 import kotlinx.coroutines.launch
+
+sealed interface EditContactEffect {
+    data class ShowMessage(val text: String) : EditContactEffect
+}
 
 class EditContactNode(
     private val existingContact: Contact?,
     private val repository: ContactsRepository,
     parentScope: kotlinx.coroutines.CoroutineScope
-) : StatefulNode<EditContactState, EditContactEvent, ContactsFlowEvent>(
+) : EffectfulStatefulNode<EditContactState, EditContactEvent, ContactsFlowEvent, EditContactEffect>(
     parentScope = parentScope,
     initialState = EditContactState.fromContact(existingContact)
-) {
+), ResultNode<Contact> {
+
+    private val _result = kotlinx.coroutines.flow.MutableSharedFlow<KmposableResult<Contact>>(replay = 1)
+    override val result = _result
+    private var resultEmitted = false
 
     override fun onEvent(event: EditContactEvent) {
         when (event) {
             is EditContactEvent.NameChanged -> updateState { it.copy(name = event.value, error = null) }
             is EditContactEvent.PhoneChanged -> updateState { it.copy(phone = event.value, error = null) }
             is EditContactEvent.EmailChanged -> updateState { it.copy(email = event.value, error = null) }
-            EditContactEvent.CancelClicked -> scope.launch { emitOutput(ContactsFlowEvent.EditorCancelled) }
+            EditContactEvent.CancelClicked -> scope.launch { emitResult(KmposableResult.Canceled) }
             EditContactEvent.SaveClicked -> scope.launch { saveContact() }
         }
     }
@@ -38,10 +48,28 @@ class EditContactNode(
                 email = current.email?.trim().takeUnless { it.isNullOrBlank() }
             )
             repository.upsert(contact)
-            emitOutput(ContactsFlowEvent.ContactSaved(contact))
+            emitEffect(EditContactEffect.ShowMessage("Saved"))
+            emitResult(KmposableResult.Ok(contact))
         } catch (t: Throwable) {
             updateState { it.copy(isSaving = false, error = t.message ?: "Failed to save contact") }
+            emitEffect(EditContactEffect.ShowMessage("Failed to save contact"))
         }
+    }
+
+    private suspend fun emitResult(value: KmposableResult<Contact>) {
+        if (resultEmitted) return
+        resultEmitted = true
+        _result.emit(value)
+    }
+
+    private fun tryEmitResult(value: KmposableResult<Contact>) {
+        if (resultEmitted) return
+        resultEmitted = _result.tryEmit(value) || resultEmitted
+    }
+
+    override fun onDetach() {
+        tryEmitResult(KmposableResult.Canceled)
+        super.onDetach()
     }
 
     private fun validate(state: EditContactState): String? {

@@ -121,6 +121,8 @@ Highlights:
 - **DI/ViewModels** – combine `rememberNavFlow` with your DI container; no Android-specific
   dependencies required.
 - **Tracing** – feed `onTrace` into scripts to integrate with analytics or loggers.
+- **Side effects** – implement `EffectSource` or extend `EffectfulStatefulNode` when you need a
+  one-off effects stream (analytics, toasts) separate from navigation outputs.
 
 For scripts specifically, see [NavFlow Scripts]({{ site.baseurl }}/guides/flowscripts/) and the
 [Cookbook]({{ site.baseurl }}/cookbook/).

@@ -5,9 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,7 +21,8 @@ import dev.goquick.kmposable.sampleapp.contacts.EditContactState
 @Composable
 fun EditContactScreen(
     state: EditContactState,
-    onEvent: (EditContactEvent) -> Unit
+    onEvent: (EditContactEvent) -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -52,5 +55,6 @@ fun EditContactScreen(
         Button(onClick = { onEvent(EditContactEvent.CancelClicked) }) {
             Text("Cancel")
         }
+        SnackbarHost(hostState = snackbarHostState)
     }
 }

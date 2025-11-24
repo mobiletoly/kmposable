@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -11,7 +13,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.launch
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -29,7 +33,9 @@ import dev.goquick.kmposable.sampleapp.contacts.ContactsFlowEvent
 import dev.goquick.kmposable.sampleapp.contacts.ContactsListNode
 import dev.goquick.kmposable.sampleapp.contacts.ContactsNavFlow
 import dev.goquick.kmposable.sampleapp.contacts.EditContactNode
+import dev.goquick.kmposable.sampleapp.contacts.EditContactEffect
 import dev.goquick.kmposable.sampleapp.contacts.InMemoryContactsRepository
+import dev.goquick.kmposable.sampleapp.contacts.ContactDetailsEffect
 import dev.goquick.kmposable.sampleapp.contacts.ui.ContactDetailsScreen
 import dev.goquick.kmposable.sampleapp.contacts.ui.ContactsListScreen
 import dev.goquick.kmposable.sampleapp.contacts.ui.EditContactScreen
@@ -49,7 +55,9 @@ fun App() {
     }
 
     MaterialTheme {
-        Scaffold(bottomBar = { AppBottomBar(navController) }) { paddingValues ->
+        Scaffold(
+            bottomBar = { AppBottomBar(navController) }
+        ) { paddingValues ->
             NavHost(
                 navController = navController,
                 startDestination = AppRoute.Contacts.route,
@@ -73,6 +81,8 @@ private fun ContactsDestination(
     val navFlow = rememberNavFlow(key = repository) { scope ->
         ContactsNavFlow(repository = repository, appScope = scope)
     }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val effectScope = rememberCoroutineScope()
 
     val renderer: NodeRenderer<ContactsFlowEvent> = remember {
         nodeRenderer {
@@ -82,16 +92,51 @@ private fun ContactsDestination(
             }
             register<ContactDetailsNode> { node ->
                 val state by node.state.collectAsState()
+                val latestSnackbarHost = rememberUpdatedState(snackbarHostState)
+                androidx.compose.runtime.DisposableEffect(node) {
+                    val job = effectScope.launch {
+                        node.effects.collect { effect ->
+                            when (effect) {
+                                is ContactDetailsEffect.ShowMessage -> {
+                                    effectScope.launch {
+                                        latestSnackbarHost.value.showSnackbar(effect.text)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    onDispose { job.cancel() }
+                }
                 ContactDetailsScreen(state = state, onEvent = node::onEvent)
             }
             register<EditContactNode> { node ->
                 val state by node.state.collectAsState()
-                EditContactScreen(state = state, onEvent = node::onEvent)
+                val latestSnackbarHost = rememberUpdatedState(snackbarHostState)
+                androidx.compose.runtime.DisposableEffect(node) {
+                    val job = effectScope.launch {
+                        node.effects.collect { effect ->
+                            when (effect) {
+                                is EditContactEffect.ShowMessage -> {
+                                    effectScope.launch {
+                                        latestSnackbarHost.value.showSnackbar(effect.text)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    onDispose { job.cancel() }
+                }
+                EditContactScreen(
+                    state = state,
+                    onEvent = node::onEvent,
+                    snackbarHostState = snackbarHostState
+                )
             }
         }
     }
 
     NavFlowHost(navFlow = navFlow, renderer = renderer)
+    SnackbarHost(hostState = snackbarHostState)
 }
 
 @Composable

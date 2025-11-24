@@ -15,6 +15,8 @@ repository – each section below links to source directories.
 | `LifecycleAwareNode`         | Optional hooks (`onAttach`, `onDetach`) invoked when NavFlow pushes/pops nodes.                                |
 | `StatefulNode`               | Base class that manages state via `MutableStateFlow`, exposes `updateState`, `emitOutput`.                     |
 | `DelegatingNode`             | Wraps another node and delegates everything by default – override only the parts you need (e.g., map outputs). |
+| `EffectSource` / `EffectfulStatefulNode` | Opt-in effects channel for one-off side effects (analytics, toasts, etc.) separate from outputs.          |
+| `ResultNode`, `KmposableResult` | Opt-in “start for result” contract; nodes emit typed results independent of outputs.                         |
 
 ## Navigation Runtime (`library-core/runtime`)
 
@@ -26,6 +28,7 @@ repository – each section below links to source directories.
 - `KmposableNavState` – snapshot with `stack`, `top`, `root`, `size` accessors.
 - `KmposableStackEntry` / `DefaultStackEntry` – pair node with metadata; override when you need tags
   or IDs for testing/analytics.
+- `NavDiff` / `diffNavState` – structural diff between nav states (pushed/popped entries).
 - `NavFlowScriptScope` – script-facing API (`showRoot`, `pushNode`, `replaceTop`, `awaitOutput*`,
   `trace`, `createEntry`). Run scripts via `NavFlow.runFlow(scope, onTrace) { step { … } }` or
   `NavFlow.launchNavFlowScript(scope, onTrace, script)`.
