@@ -61,6 +61,9 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
 
     private var started = false
 
+    /** True when [start] has been invoked and the runtime is active. */
+    fun isStarted(): Boolean = started
+
     /** Starts the runtime if it has not been started yet. Safe to call multiple times. */
     fun start() {
         if (started) return
