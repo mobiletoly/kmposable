@@ -122,7 +122,9 @@ Highlights:
   dependencies required.
 - **Tracing** – feed `onTrace` into scripts to integrate with analytics or loggers.
 - **Side effects** – implement `EffectSource` or extend `EffectfulStatefulNode` when you need a
-  one-off effects stream (analytics, toasts) separate from navigation outputs.
+  one-off effects stream (analytics, toasts) separate from navigation outputs. In Compose, collect
+  them with `CollectEffects(node) { effect -> /* show snackbar / log */ }` to keep hosts lean and
+  lifecycle-aware.
 
 For scripts specifically, see [NavFlow Scripts]({{ site.baseurl }}/guides/flowscripts/) and the
 [Cookbook]({{ site.baseurl }}/cookbook/).

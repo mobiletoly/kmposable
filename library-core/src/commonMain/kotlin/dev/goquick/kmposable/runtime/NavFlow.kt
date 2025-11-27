@@ -83,6 +83,15 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     }
 
     /**
+     * Safe variant of [push] that returns false without throwing if the flow is not started.
+     */
+    fun pushIfStarted(node: Node<*, *, OUT>): Boolean {
+        if (!started) return false
+        push(node)
+        return true
+    }
+
+    /**
      * Pops the stack if possible and tears down lifecycle observers for the removed node.
      *
      * @return true if a node was removed, false if already at the root.
@@ -92,6 +101,14 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         val removed = navigator.pop()
         removed?.let { detachNode(it.node) }
         return removed != null
+    }
+
+    /**
+     * Safe variant of [pop] that returns false without throwing if the flow is not started.
+     */
+    fun popIfStarted(): Boolean {
+        if (!started) return false
+        return pop()
     }
 
     /** Replaces the stack with a single node (used for flow resets/onboarding swap). */
