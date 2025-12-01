@@ -91,7 +91,7 @@ private fun ContactsDestination(
 @Composable
 private fun SettingsDestination() {
     val scope = rememberCoroutineScope()
-    val node = remember { SettingsNode(scope = scope) }
+    val node = remember { SettingsNode(parentScope = scope) }
 
     SettingsHost(node)
 }
