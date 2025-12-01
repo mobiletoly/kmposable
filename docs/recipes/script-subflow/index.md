@@ -20,3 +20,10 @@ suspend fun NavFlowScriptScope<AppOutput, *>.collectAddress(
 ```
 
 Call `collectAddress()` from profile setup, checkout, etc. to keep the steps in one place.
+
+When to use:
+- Any sub-flow you want to reuse across multiple scripts (address, picker, auth challenge).
+
+Why it matters:
+- Reusable sub-flow keeps address collection consistent across features.
+- `pushForResult` handles push → await → pop, so callers stay compact.

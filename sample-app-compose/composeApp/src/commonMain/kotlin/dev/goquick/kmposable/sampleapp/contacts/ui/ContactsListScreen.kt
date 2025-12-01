@@ -20,15 +20,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import dev.goquick.kmposable.sampleapp.contacts.Contact
-import dev.goquick.kmposable.sampleapp.contacts.ContactsListEvent
-import dev.goquick.kmposable.sampleapp.contacts.ContactsListState
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsListEvent
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsListState
 
 @Composable
 fun ContactsListScreen(
     state: ContactsListState,
-    onEvent: (ContactsListEvent) -> Unit
+    onEvent: (ContactsListEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(modifier = modifier.fillMaxSize().padding(16.dp)) {
         OutlinedTextField(
             value = state.query,
             onValueChange = { onEvent(ContactsListEvent.SearchChanged(it)) },

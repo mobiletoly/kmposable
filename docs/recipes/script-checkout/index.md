@@ -40,4 +40,10 @@ fun NavFlow<OrderOutput, *>.launchCheckoutScript(
 }
 ```
 
-Illustrates branching, tracing, and reusing helpers (`awaitOutputCase`, `trace`, `pushNode`).
+When to use:
+- Multi-step checkout/wizard flows where policy, retries, and tracing belong in one place.
+
+Why it matters:
+- Centralises checkout policy (cart → shipping → payment → confirmation/retry) in one coroutine.
+- Shows tracing, branching, and reuse of helpers (`awaitOutputCase`, `trace`, `pushNode`).
+- Nodes stay focused on UI/state; payment retry/branch logic lives here and is easy to test headlessly.

@@ -3,6 +3,13 @@ package dev.goquick.kmposable.sampleapp.contacts
 import dev.goquick.kmposable.runtime.SimpleNavFlowFactory
 import dev.goquick.kmposable.test.createTestScenario
 import dev.goquick.kmposable.core.KmposableResult
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactDetailsEvent
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactDetailsNode
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsFlowEvent
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsListEvent
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsNavFlow
+import dev.goquick.kmposable.sampleapp.contacts.flow.EditContactEvent
+import dev.goquick.kmposable.sampleapp.contacts.flow.EditContactNode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest

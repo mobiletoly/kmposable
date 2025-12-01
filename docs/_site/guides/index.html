@@ -387,7 +387,12 @@ consume internal back events.</li>
 dependencies required.</li>
   <li><strong>Tracing</strong> – feed <code class="language-plaintext highlighter-rouge">onTrace</code> into scripts to integrate with analytics or loggers.</li>
   <li><strong>Side effects</strong> – implement <code class="language-plaintext highlighter-rouge">EffectSource</code> or extend <code class="language-plaintext highlighter-rouge">EffectfulStatefulNode</code> when you need a
-one-off effects stream (analytics, toasts) separate from navigation outputs.</li>
+one-off effects stream (analytics, toasts) separate from navigation outputs. In Compose, collect
+them with <code class="language-plaintext highlighter-rouge">CollectEffects(node) { effect -&gt; /* show snackbar / log */ }</code> to keep hosts lean and
+lifecycle-aware.</li>
+  <li><strong>Result-only subflows</strong> – extend <code class="language-plaintext highlighter-rouge">ResultOnlyNode&lt;STATE, EVENT, RESULT&gt;</code> when a screen should only
+return a result (OUTPUT = Nothing). Push it with <code class="language-plaintext highlighter-rouge">pushAndAwaitResultOnly</code> / <code class="language-plaintext highlighter-rouge">launchPushAndAwaitResultOnly</code>
+so you don’t have to thread the NavFlow’s OUT through result-only nodes.</li>
 </ul>
 
 <p>For scripts specifically, see <a href="/kmposable/guides/flowscripts/">NavFlow Scripts</a> and the

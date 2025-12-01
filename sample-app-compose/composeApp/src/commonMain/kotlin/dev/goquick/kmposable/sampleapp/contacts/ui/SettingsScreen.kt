@@ -19,9 +19,10 @@ import dev.goquick.kmposable.sampleapp.settings.SettingsState
 @Composable
 fun SettingsScreen(
     state: SettingsState,
-    onEvent: (SettingsEvent) -> Unit
+    onEvent: (SettingsEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Surface {
+    Surface(modifier = modifier) {
         Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(text = "Settings", style = MaterialTheme.typography.headlineMedium)
             Row(

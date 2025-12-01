@@ -1,14 +1,21 @@
-package dev.goquick.kmposable.sampleapp.contacts
+package dev.goquick.kmposable.sampleapp.contacts.flow
 
 import dev.goquick.kmposable.core.EffectfulStatefulNode
 import dev.goquick.kmposable.core.KmposableResult
 import dev.goquick.kmposable.core.ResultNode
+import dev.goquick.kmposable.sampleapp.contacts.Contact
+import dev.goquick.kmposable.sampleapp.contacts.ContactId
+import dev.goquick.kmposable.sampleapp.contacts.ContactsRepository
 import kotlinx.coroutines.launch
 
 sealed interface EditContactEffect {
     data class ShowMessage(val text: String) : EditContactEffect
 }
 
+/**
+ * Result-only node for editing/creating a contact. Emits transient effects for UX messaging
+ * and a KmposableResult for the parent NavFlow to react to. Kept headless for reuse in tests.
+ */
 class EditContactNode(
     private val existingContact: Contact?,
     private val repository: ContactsRepository,

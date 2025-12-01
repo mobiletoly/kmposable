@@ -71,3 +71,10 @@ abstract class ResultfulStatefulNode<
         return tryEmitResult(KmposableResult.Canceled)
     }
 }
+
+/**
+ * Convenience base for result-only nodes that never emit NavFlow outputs (OUTPUT = Nothing).
+ * Use this when you treat a node as a function-call style sub-flow that returns a single result.
+ */
+typealias ResultOnlyNode<STATE, EVENT, RESULT> =
+    ResultfulStatefulNode<STATE, EVENT, Nothing, RESULT>

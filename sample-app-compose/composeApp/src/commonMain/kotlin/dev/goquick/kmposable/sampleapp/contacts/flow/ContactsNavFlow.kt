@@ -1,16 +1,20 @@
-package dev.goquick.kmposable.sampleapp.contacts
+package dev.goquick.kmposable.sampleapp.contacts.flow
 
 import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.core.nav.DefaultStackEntry
 import dev.goquick.kmposable.core.nav.KmposableStackNavigator
 import dev.goquick.kmposable.core.KmposableResult
 import dev.goquick.kmposable.runtime.NavFlow
+import dev.goquick.kmposable.sampleapp.contacts.Contact
+import dev.goquick.kmposable.sampleapp.contacts.ContactId
+import dev.goquick.kmposable.sampleapp.contacts.ContactsRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 /**
  * Single-flow runtime that owns list, details, and edit nodes for the Contacts feature.
+ * Lives in the `contacts.flow` package to keep headless logic separate from UI/hosts.
  */
 class ContactsNavFlow(
     private val repository: ContactsRepository,

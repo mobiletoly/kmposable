@@ -1,8 +1,15 @@
-package dev.goquick.kmposable.sampleapp.contacts
+package dev.goquick.kmposable.sampleapp.contacts.flow
 
 import dev.goquick.kmposable.core.StatefulNode
+import dev.goquick.kmposable.sampleapp.contacts.Contact
+import dev.goquick.kmposable.sampleapp.contacts.ContactId
+import dev.goquick.kmposable.sampleapp.contacts.ContactsRepository
 import kotlinx.coroutines.launch
 
+/**
+ * Headless list node: exposes list/search state and emits navigation outputs.
+ * UI lives elsewhere; this stays pure Kotlin for reuse/testing.
+ */
 class ContactsListNode(
     private val repository: ContactsRepository,
     parentScope: kotlinx.coroutines.CoroutineScope

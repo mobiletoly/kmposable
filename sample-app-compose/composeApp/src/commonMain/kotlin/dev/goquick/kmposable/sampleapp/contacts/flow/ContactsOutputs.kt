@@ -1,4 +1,7 @@
-package dev.goquick.kmposable.sampleapp.contacts
+package dev.goquick.kmposable.sampleapp.contacts.flow
+
+import dev.goquick.kmposable.sampleapp.contacts.Contact
+import dev.goquick.kmposable.sampleapp.contacts.ContactId
 
 /** Outputs raised by any node inside the Contacts flow. */
 sealed interface ContactsFlowEvent {

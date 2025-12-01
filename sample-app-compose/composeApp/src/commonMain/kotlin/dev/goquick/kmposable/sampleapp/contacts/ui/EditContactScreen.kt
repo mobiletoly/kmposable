@@ -12,16 +12,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.goquick.kmposable.sampleapp.contacts.EditContactEvent
-import dev.goquick.kmposable.sampleapp.contacts.EditContactState
+import dev.goquick.kmposable.sampleapp.contacts.flow.EditContactEvent
+import dev.goquick.kmposable.sampleapp.contacts.flow.EditContactState
 
 @Composable
 fun EditContactScreen(
     state: EditContactState,
-    onEvent: (EditContactEvent) -> Unit
+    onEvent: (EditContactEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         OutlinedTextField(

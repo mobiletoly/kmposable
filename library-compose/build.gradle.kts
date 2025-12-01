@@ -42,6 +42,7 @@ kotlin {
             dependencies {
                 implementation(project(":library-core"))
                 implementation(compose.runtime)
+                implementation(compose.foundation)
                 implementation(libs.androidxLifecycleViewmodel)
             }
         }

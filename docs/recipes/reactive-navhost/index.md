@@ -4,10 +4,12 @@ title: Compose + NavHost + NavFlow
 permalink: /cookbook/recipes/reactive-navhost/
 ---
 
-Full example from `sample-app-compose`: NavHost owns tabs/routes while Kmposable powers inner flows.
+NavHost owns tabs/routes; Kmposable owns inner flows. The sample app uses this split with Contacts (NavFlow)
+and Settings (single node).
 
-This mirrors the structure in `sample-app-compose`: NavHost owns tabs/routes while Kmposable handles
-inner flows.
+When to use:
+- Apps that already use NavHost for top-level routes/tabs but want Kmposable flows per destination.
+- You want headless flows reusable across platforms while keeping Android navigation at the edges.
 
 ```kotlin
 @Composable
@@ -46,30 +48,14 @@ fun ContactsDestination(
         ContactsNavFlow(repository = repository, appScope = scope)
     }
 
-    val renderer = remember {
-        nodeRenderer<ContactsFlowEvent> {
-            register<ContactsListNode> { node ->
-                val state by node.state.collectAsState()
-                ContactsListScreen(state = state, onEvent = node::onEvent)
-            }
-            register<ContactDetailsNode> { node ->
-                val state by node.state.collectAsState()
-                ContactDetailsScreen(state = state, onEvent = node::onEvent)
-            }
-        }
-    }
-
-    LaunchedEffect(navFlow) {
-        navFlow.outputs.collect { output ->
-            when (output) {
-                is ContactsFlowEvent.OpenContact ->
-                    navController.navigate("contactDetails/${output.id}")
-                ContactsFlowEvent.Done -> navController.popBackStack()
-            }
-        }
-    }
-
+    val renderer = remember { contactsRenderer() } // registers nodes to Hosts (not Screens)
     NavFlowHost(navFlow = navFlow, renderer = renderer)
+}
+
+private fun contactsRenderer(): NodeRenderer<ContactsFlowEvent> = nodeRenderer {
+    register<ContactsListNode> { node -> ContactsListHost(node) }
+    register<ContactDetailsNode> { node -> ContactDetailsHost(node) }
+    register<EditContactNode> { node -> EditContactHost(node) }
 }
 ```
 
@@ -77,4 +63,5 @@ fun ContactsDestination(
 
 - Keeps NavHost responsible for top-level navigation (tabs, deep links).
 - Kmposable stays reusable/headless inside each destination.
-- Outputs map directly to NavController actions, no wrapper interfaces.
+- NavFlow navigation stays internal; NavHost navigation stays at the edges.
+- Renderer wires nodes → Hosts so Screens stay pure UI. See [Layering](/cookbook/recipes/reactive-layering/).

@@ -13,16 +13,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import dev.goquick.kmposable.sampleapp.contacts.ContactDetailsEvent
-import dev.goquick.kmposable.sampleapp.contacts.ContactDetailsState
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactDetailsEvent
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactDetailsState
 
 @Composable
 fun ContactDetailsScreen(
     state: ContactDetailsState,
-    onEvent: (ContactDetailsEvent) -> Unit
+    onEvent: (ContactDetailsEvent) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         when {

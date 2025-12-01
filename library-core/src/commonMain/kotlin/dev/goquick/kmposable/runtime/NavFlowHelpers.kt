@@ -2,6 +2,7 @@ package dev.goquick.kmposable.runtime
 
 import dev.goquick.kmposable.core.KmposableResult
 import dev.goquick.kmposable.core.ResultNode
+import dev.goquick.kmposable.core.ResultOnlyNode
 import dev.goquick.kmposable.core.nav.KmposableStackEntry
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -50,6 +51,19 @@ suspend fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>, RESULT : Any> NavFlow<
 }
 
 /**
+ * Variant for result-only nodes (OUTPUT = Nothing) so callers don't need to mention the flow's OUT.
+ */
+suspend fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>, RESULT : Any> NavFlow<OUT, ENTRY>.pushAndAwaitResultOnly(
+    factory: () -> ResultOnlyNode<*, *, RESULT>,
+    autoPop: Boolean = true,
+    onResult: (KmposableResult<RESULT>) -> Unit = {}
+): KmposableResult<RESULT> = pushAndAwaitResult(
+    factory = factory as () -> ResultNode<RESULT>,
+    autoPop = autoPop,
+    onResult = onResult
+)
+
+/**
  * Launches a coroutine that pushes a result node from [factory], awaits the first result,
  * optionally pops it, and forwards the result to [onResult].
  *
@@ -63,4 +77,16 @@ fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>, RESULT : Any> CoroutineScope.l
     onResult: (KmposableResult<RESULT>) -> Unit = {}
 ): Job = launch {
     navFlow.pushAndAwaitResult(factory, autoPop, onResult)
+}
+
+/**
+ * Variant for result-only nodes (OUTPUT = Nothing) so callers don't need to mention the flow's OUT.
+ */
+fun <OUT : Any, ENTRY : KmposableStackEntry<OUT>, RESULT : Any> CoroutineScope.launchPushAndAwaitResultOnly(
+    navFlow: NavFlow<OUT, ENTRY>,
+    factory: () -> ResultOnlyNode<*, *, RESULT>,
+    autoPop: Boolean = true,
+    onResult: (KmposableResult<RESULT>) -> Unit = {}
+): Job = launch {
+    navFlow.pushAndAwaitResult(factory as () -> ResultNode<RESULT>, autoPop, onResult)
 }

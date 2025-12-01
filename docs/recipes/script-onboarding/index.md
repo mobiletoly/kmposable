@@ -19,7 +19,12 @@ fun NavFlow<OnboardingOutput, *>.launchOnboardingScript(
         is OnboardingOutput.AuthResult.Error -> showRoot { ErrorNode(viewModelScope) }
     }
 }
-```
+``` 
 
-**Why**: keeps splash → sign-in → dashboard policy in one spot; Compose just renders whatever the
-script shows. Tests call the same script via `FlowTestScenario.launchScript { … }`.
+When to use:
+- Linear onboarding “stories” (splash → auth → dashboard) where policy belongs in one coroutine.
+
+Why it matters:
+- Keeps splash → sign-in → dashboard policy in one spot; Compose just renders whatever the script shows.
+- Nodes stay dumb (emit outputs only); the script owns the story and branching.
+- Uses the same script in tests via `FlowTestScenario.launchScript { … }` for parity.

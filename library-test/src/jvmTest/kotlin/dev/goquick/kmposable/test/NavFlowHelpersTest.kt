@@ -3,9 +3,12 @@ package dev.goquick.kmposable.test
 import dev.goquick.kmposable.core.KmposableResult
 import dev.goquick.kmposable.core.ResultNode
 import dev.goquick.kmposable.core.StatefulNode
+import dev.goquick.kmposable.core.ResultOnlyNode
 import dev.goquick.kmposable.runtime.NavFlow
 import dev.goquick.kmposable.runtime.launchPushAndAwaitResult
+import dev.goquick.kmposable.runtime.launchPushAndAwaitResultOnly
 import dev.goquick.kmposable.runtime.pushAndAwaitResult
+import dev.goquick.kmposable.runtime.pushAndAwaitResultOnly
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -204,6 +207,39 @@ class NavFlowHelpersTest {
         navFlow.dispose()
     }
 
+    @Test
+    fun pushAndAwaitResult_resultOnly_overload_hides_out_type() = runTest {
+        val root = ResultNodeStub(this)
+        val navFlow = NavFlow(appScope = this, rootNode = root).also { it.start() }
+        advanceUntilIdle()
+
+        val result = navFlow.pushAndAwaitResultOnly(
+            factory = { ResultOnlyStub(this, resultValue = "only") }
+        )
+
+        assertEquals(KmposableResult.Ok("only"), result)
+        navFlow.dispose()
+    }
+
+    @Test
+    fun launchPushAndAwaitResult_resultOnly_overload() = runTest {
+        val root = ResultNodeStub(this)
+        val navFlow = NavFlow(appScope = this, rootNode = root).also { it.start() }
+        advanceUntilIdle()
+
+        var callback: KmposableResult<String>? = null
+        val job = launchPushAndAwaitResultOnly(
+            navFlow = navFlow,
+            factory = { ResultOnlyStub(this, resultValue = "launched-only") },
+            onResult = { callback = it }
+        )
+        withTimeout(200) { job.join() }
+        advanceUntilIdle()
+
+        assertEquals(KmposableResult.Ok("launched-only"), callback)
+        navFlow.dispose()
+    }
+
     private class ResultNodeStub(
         parentScope: kotlinx.coroutines.CoroutineScope,
         private val emitResult: Boolean = true,
@@ -233,6 +269,39 @@ class NavFlowHelpersTest {
         }
 
         override fun onAttach() = Unit
+
+        override fun onEvent(event: Unit) = Unit
+    }
+
+    private class ResultOnlyStub(
+        parentScope: kotlinx.coroutines.CoroutineScope,
+        private val emitResult: Boolean = true,
+        private val resultValue: String = "ok",
+        private val emitImmediately: Boolean = true
+    ) : ResultOnlyNode<Unit, Unit, String>(
+        parentScope = parentScope,
+        initialState = Unit
+    ) {
+        private val flow = kotlinx.coroutines.flow.MutableSharedFlow<KmposableResult<String>>(replay = 1, extraBufferCapacity = 1)
+        override val result = flow
+
+        init {
+            if (emitImmediately) {
+                emitResultNow()
+            }
+        }
+
+        fun emitResultNow(result: KmposableResult<String> = defaultResult()) {
+            flow.tryEmit(result)
+        }
+
+        private fun defaultResult(): KmposableResult<String> {
+            return if (emitResult) {
+                KmposableResult.Ok(resultValue)
+            } else {
+                KmposableResult.Canceled
+            }
+        }
 
         override fun onEvent(event: Unit) = Unit
     }

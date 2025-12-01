@@ -22,4 +22,10 @@ suspend fun NavFlowScriptScope<ContactsOutput, *>.runContactsFlow(
 }
 ```
 
-Full implementation in `sample-app-flowscript`: the script loads contacts, drives details/editor flows, and refreshes list nodes while Compose UI stays simple.
+When to use:
+- Reusable list/details/editor flows where UI should stay reactive and navigation policy stays central.
+
+Why it matters:
+- The list/details/editor policy stays in one loop; Compose just renders the current node.
+- Shows how to reuse the same editor sub-flow for “open contact” and “create contact.”
+- Full implementation in `sample-app-flowscript` includes refresh + sub-flow reuse without UI branching.

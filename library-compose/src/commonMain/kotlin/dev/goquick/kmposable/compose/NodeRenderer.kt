@@ -17,6 +17,7 @@ package dev.goquick.kmposable.compose
 
 import androidx.compose.runtime.Composable
 import dev.goquick.kmposable.core.Node
+import dev.goquick.kmposable.core.ResultOnlyNode
 import kotlin.reflect.KClass
 
 /** Registry of Composable renderers keyed by node type. */
@@ -53,6 +54,18 @@ class NodeRendererBuilder<OUT : Any> internal constructor() {
     /** Registers a renderer for the given node type [T]. */
     inline fun <reified T : Node<*, *, OUT>> register(noinline renderer: @Composable (T) -> Unit) {
         delegates[T::class] = { node -> renderer(node as T) }
+    }
+
+    /**
+     * Registers a renderer for a result-only node (OUTPUT = Nothing) without requiring callers to
+     * mention the NavFlow's OUT. Use this for ResultOnlyNode subclasses to avoid misleading OUT types.
+     */
+    inline fun <reified T : ResultOnlyNode<*, *, *>> registerResultOnly(
+        noinline renderer: @Composable (T) -> Unit
+    ) {
+        @Suppress("UNCHECKED_CAST")
+        val key = T::class as KClass<out Node<*, *, OUT>>
+        delegates[key] = { node -> renderer(node as T) }
     }
 
     /** Sets a fallback renderer used when no type-specific delegate is found. */

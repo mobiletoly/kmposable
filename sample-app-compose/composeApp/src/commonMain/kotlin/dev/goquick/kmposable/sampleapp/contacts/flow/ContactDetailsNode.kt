@@ -1,12 +1,19 @@
-package dev.goquick.kmposable.sampleapp.contacts
+package dev.goquick.kmposable.sampleapp.contacts.flow
 
 import dev.goquick.kmposable.core.EffectfulStatefulNode
+import dev.goquick.kmposable.sampleapp.contacts.Contact
+import dev.goquick.kmposable.sampleapp.contacts.ContactId
+import dev.goquick.kmposable.sampleapp.contacts.ContactsRepository
 import kotlinx.coroutines.launch
 
 sealed interface ContactDetailsEffect {
     data class ShowMessage(val text: String) : ContactDetailsEffect
 }
 
+/**
+ * Effectful node for a single contact: keeps data loading logic headless and emits outputs
+ * for edit/delete/back while effects carry transient UI signals (snackbars).
+ */
 class ContactDetailsNode(
     private val contactId: ContactId,
     private val repository: ContactsRepository,

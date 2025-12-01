@@ -4,18 +4,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
-import kotlinx.coroutines.launch
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -27,16 +21,21 @@ import dev.goquick.kmposable.compose.nodeRenderer
 import dev.goquick.kmposable.compose.rememberNavFlow
 import dev.goquick.kmposable.sampleapp.contacts.Contact
 import dev.goquick.kmposable.sampleapp.contacts.ContactId
-import dev.goquick.kmposable.sampleapp.contacts.ContactsFlowEvent
-import dev.goquick.kmposable.sampleapp.contacts.ContactsListNode
-import dev.goquick.kmposable.sampleapp.contacts.ContactsNavFlow
 import dev.goquick.kmposable.sampleapp.contacts.InMemoryContactsRepository
-import dev.goquick.kmposable.sampleapp.contacts.ui.ContactDetailsScreen
-import dev.goquick.kmposable.sampleapp.contacts.ui.ContactsListScreen
-import dev.goquick.kmposable.sampleapp.contacts.ui.EditContactScreen
-import dev.goquick.kmposable.sampleapp.contacts.ui.SettingsScreen
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactDetailsNode
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsListNode
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsNavFlow
+import dev.goquick.kmposable.sampleapp.contacts.flow.EditContactNode
+import dev.goquick.kmposable.sampleapp.contacts.ui.ContactDetailsHost
+import dev.goquick.kmposable.sampleapp.contacts.ui.ContactsListHost
+import dev.goquick.kmposable.sampleapp.contacts.ui.EditContactHost
+import dev.goquick.kmposable.sampleapp.settings.SettingsHost
 import dev.goquick.kmposable.sampleapp.settings.SettingsNode
 
+// This sample intentionally follows the Node → Host → Screen layering:
+// - Nodes live in shared logic and emit state/effects/outputs.
+// - Hosts live in Compose, collect node state/effects, and pass clean callbacks to Screens.
+// - Screens are pure UI (state in, events out), making them easy to preview/reuse.
 @Composable
 fun App() {
     val navController = rememberNavController()
@@ -77,12 +76,12 @@ private fun ContactsDestination(
         ContactsNavFlow(repository = repository, appScope = scope)
     }
 
+    // Renderer maps nodes → hosts. Hosts then wire state/effects to pure Screens.
     val renderer = remember {
         nodeRenderer {
-            register<ContactsListNode> { node ->
-                val state by node.state.collectAsState()
-                ContactsListScreen(state = state, onEvent = node::onEvent)
-            }
+            register<ContactsListNode> { node -> ContactsListHost(node) }
+            register<ContactDetailsNode> { node -> ContactDetailsHost(node) }
+            register<EditContactNode> { node -> EditContactHost(node) }
         }
     }
 
@@ -92,10 +91,9 @@ private fun ContactsDestination(
 @Composable
 private fun SettingsDestination() {
     val scope = rememberCoroutineScope()
-    val node = remember { SettingsNode(scope) }
-    val state by node.state.collectAsState()
+    val node = remember { SettingsNode(scope = scope) }
 
-    SettingsScreen(state = state, onEvent = node::onEvent)
+    SettingsHost(node)
 }
 
 @Composable

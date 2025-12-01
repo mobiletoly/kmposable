@@ -263,7 +263,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   <div class="post-content">
     <p>This page summarizes the most important APIs. For full details open the corresponding files in the
-repository – each section below links to source directories.</p>
+repository - each section below links to source directories.</p>
 
 <h2 id="core-primitives-library-coresrccommonmainkotlindevgoquickkmposablecore">Core Primitives (<code class="language-plaintext highlighter-rouge">library-core/src/commonMain/kotlin/dev/goquick/kmposable/core</code>)</h2>
 
@@ -289,15 +289,15 @@ repository – each section below links to source directories.</p>
     </tr>
     <tr>
       <td><code class="language-plaintext highlighter-rouge">DelegatingNode</code></td>
-      <td>Wraps another node and delegates everything by default – override only the parts you need (e.g., map outputs).</td>
+      <td>Wraps another node and delegates everything by default - override only the parts you need (e.g., map outputs).</td>
     </tr>
     <tr>
       <td><code class="language-plaintext highlighter-rouge">EffectSource</code> / <code class="language-plaintext highlighter-rouge">EffectfulStatefulNode</code></td>
       <td>Opt-in effects channel for one-off side effects (analytics, toasts, etc.) separate from outputs.</td>
     </tr>
     <tr>
-      <td><code class="language-plaintext highlighter-rouge">ResultNode</code>, <code class="language-plaintext highlighter-rouge">KmposableResult</code></td>
-      <td>Opt-in “start for result” contract; nodes emit typed results independent of outputs.</td>
+      <td><code class="language-plaintext highlighter-rouge">ResultNode</code>, <code class="language-plaintext highlighter-rouge">ResultfulStatefulNode</code>, <code class="language-plaintext highlighter-rouge">ResultOnlyNode</code>, <code class="language-plaintext highlighter-rouge">KmposableResult</code></td>
+      <td>Opt-in “start for result” contract; <code class="language-plaintext highlighter-rouge">ResultfulStatefulNode</code> provides the flow + emit helpers; <code class="language-plaintext highlighter-rouge">ResultOnlyNode</code> is the OUTPUT=Nothing variant for result-only screens.</td>
     </tr>
   </tbody>
 </table>
@@ -305,30 +305,37 @@ repository – each section below links to source directories.</p>
 <h2 id="navigation-runtime-library-coreruntime">Navigation Runtime (<code class="language-plaintext highlighter-rouge">library-core/runtime</code>)</h2>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">NavFlow&lt;OUT, ENTRY&gt;</code> – headless runtime that owns a navigator (<code class="language-plaintext highlighter-rouge">KmposableNavigator</code>). exposes
+  <li><code class="language-plaintext highlighter-rouge">NavFlow&lt;OUT, ENTRY&gt;</code> - headless runtime that owns a navigator (<code class="language-plaintext highlighter-rouge">KmposableNavigator</code>). exposes
 <code class="language-plaintext highlighter-rouge">navState: StateFlow&lt;KmposableNavState&lt;OUT, ENTRY&gt;&gt;</code>, <code class="language-plaintext highlighter-rouge">outputs: Flow&lt;OUT&gt;</code>, stack operations
 (<code class="language-plaintext highlighter-rouge">push</code>, <code class="language-plaintext highlighter-rouge">pop</code>, <code class="language-plaintext highlighter-rouge">replaceAll</code>, <code class="language-plaintext highlighter-rouge">popTo</code>…), <code class="language-plaintext highlighter-rouge">sendEvent</code>, and lifecycle (<code class="language-plaintext highlighter-rouge">start</code>/<code class="language-plaintext highlighter-rouge">dispose</code>).</li>
-  <li><code class="language-plaintext highlighter-rouge">KmposableNavigator</code> / <code class="language-plaintext highlighter-rouge">KmposableStackNavigator</code> – stack implementation used by NavFlow. Accepts
+  <li><code class="language-plaintext highlighter-rouge">KmposableNavigator</code> / <code class="language-plaintext highlighter-rouge">KmposableStackNavigator</code> - stack implementation used by NavFlow. Accepts
 custom stack entry types when you need metadata.</li>
-  <li><code class="language-plaintext highlighter-rouge">KmposableNavState</code> – snapshot with <code class="language-plaintext highlighter-rouge">stack</code>, <code class="language-plaintext highlighter-rouge">top</code>, <code class="language-plaintext highlighter-rouge">root</code>, <code class="language-plaintext highlighter-rouge">size</code> accessors.</li>
-  <li><code class="language-plaintext highlighter-rouge">KmposableStackEntry</code> / <code class="language-plaintext highlighter-rouge">DefaultStackEntry</code> – pair node with metadata; override when you need tags
+  <li><code class="language-plaintext highlighter-rouge">KmposableNavState</code> - snapshot with <code class="language-plaintext highlighter-rouge">stack</code>, <code class="language-plaintext highlighter-rouge">top</code>, <code class="language-plaintext highlighter-rouge">root</code>, <code class="language-plaintext highlighter-rouge">size</code> accessors.</li>
+  <li><code class="language-plaintext highlighter-rouge">KmposableStackEntry</code> / <code class="language-plaintext highlighter-rouge">DefaultStackEntry</code> - pair node with metadata; override when you need tags
 or IDs for testing/analytics.</li>
-  <li><code class="language-plaintext highlighter-rouge">NavDiff</code> / <code class="language-plaintext highlighter-rouge">diffNavState</code> – structural diff between nav states (pushed/popped entries).</li>
-  <li><code class="language-plaintext highlighter-rouge">NavFlowScriptScope</code> – script-facing API (<code class="language-plaintext highlighter-rouge">showRoot</code>, <code class="language-plaintext highlighter-rouge">pushNode</code>, <code class="language-plaintext highlighter-rouge">replaceTop</code>, <code class="language-plaintext highlighter-rouge">awaitOutput*</code>,
-<code class="language-plaintext highlighter-rouge">trace</code>, <code class="language-plaintext highlighter-rouge">createEntry</code>, <code class="language-plaintext highlighter-rouge">navState</code>). Run scripts via <code class="language-plaintext highlighter-rouge">NavFlow.launchNavFlowScript(scope, onTrace, script)</code>
+  <li><code class="language-plaintext highlighter-rouge">NavDiff</code> / <code class="language-plaintext highlighter-rouge">diffNavState</code> - structural diff between nav states (pushed/popped entries).</li>
+  <li><code class="language-plaintext highlighter-rouge">NavFlowScriptScope</code> - script-facing API (<code class="language-plaintext highlighter-rouge">showRoot</code>, <code class="language-plaintext highlighter-rouge">pushNode</code>, <code class="language-plaintext highlighter-rouge">replaceTop</code>, <code class="language-plaintext highlighter-rouge">awaitOutput*</code>,
+<code class="language-plaintext highlighter-rouge">trace</code>, <code class="language-plaintext highlighter-rouge">createEntry</code>, <code class="language-plaintext highlighter-rouge">navState</code>). Run scripts via
+<code class="language-plaintext highlighter-rouge">NavFlow.launchNavFlowScript(scope, onTrace, script)</code>
 or the <code class="language-plaintext highlighter-rouge">runScript</code> alias (SimpleNavFlow variants provided).</li>
-  <li>Helpers: <code class="language-plaintext highlighter-rouge">runCatchingNodeCall</code>, <code class="language-plaintext highlighter-rouge">awaitOutputCase</code>, <code class="language-plaintext highlighter-rouge">pushForResult</code>, <code class="language-plaintext highlighter-rouge">withNode</code>, etc.</li>
+  <li>Helpers: <code class="language-plaintext highlighter-rouge">runCatchingNodeCall</code>, <code class="language-plaintext highlighter-rouge">awaitOutputCase</code>, <code class="language-plaintext highlighter-rouge">pushForResult</code>,
+<code class="language-plaintext highlighter-rouge">pushAndAwaitResult(factory/onResult)</code>, result-only helpers <code class="language-plaintext highlighter-rouge">pushAndAwaitResultOnly</code> /
+<code class="language-plaintext highlighter-rouge">launchPushAndAwaitResultOnly</code>,
+safe stack ops <code class="language-plaintext highlighter-rouge">pushIfStarted</code>/<code class="language-plaintext highlighter-rouge">popIfStarted</code>, <code class="language-plaintext highlighter-rouge">withNode</code>, etc.</li>
 </ul>
 
 <h2 id="compose-adapters-library-compose">Compose Adapters (<code class="language-plaintext highlighter-rouge">library-compose</code>)</h2>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">rememberNavFlow(key, factory)</code> – creates/starts/disposes a NavFlow tied to a composable scope.</li>
-  <li><code class="language-plaintext highlighter-rouge">NavFlowHost(navFlow, renderer, enableBackHandler)</code> – observes <code class="language-plaintext highlighter-rouge">navFlow.navState</code> and renders the
+  <li><code class="language-plaintext highlighter-rouge">rememberNavFlow(key, factory)</code> - creates/starts/disposes a NavFlow tied to a composable scope.</li>
+  <li><code class="language-plaintext highlighter-rouge">NavFlowHost(navFlow, renderer, enableBackHandler)</code> - observes <code class="language-plaintext highlighter-rouge">navFlow.navState</code> and renders the
 top node. Automatically wires <code class="language-plaintext highlighter-rouge">KmposableBackHandler</code> unless disabled.</li>
-  <li><code class="language-plaintext highlighter-rouge">nodeRenderer { register&lt;MyNode&gt; { … } }</code> – DSL mapping node types to composables.</li>
-  <li><code class="language-plaintext highlighter-rouge">KmposableBackHandler</code> – expect/actual back handling that delegates to NavFlow (
+  <li><code class="language-plaintext highlighter-rouge">nodeRenderer { register&lt;MyNode&gt; { ... } }</code> - DSL mapping node types to composables.</li>
+  <li><code class="language-plaintext highlighter-rouge">KmposableBackHandler</code> - expect/actual back handling that delegates to NavFlow (
 Android/iOS/Desktop).</li>
+  <li><code class="language-plaintext highlighter-rouge">CollectEffects(node) { ... }</code> - lifecycle-aware helper to collect <code class="language-plaintext highlighter-rouge">EffectSource.effects</code> in
+Compose
+and route them to UI (e.g., snackbar, dialog, logging).</li>
 </ul>
 
 <h2 id="testing-library-test">Testing (<code class="language-plaintext highlighter-rouge">library-test</code>)</h2>
@@ -336,13 +343,13 @@ Android/iOS/Desktop).</li>
 <p><code class="language-plaintext highlighter-rouge">FlowTestScenario</code> is the main DSL:</p>
 
 <ul>
-  <li><code class="language-plaintext highlighter-rouge">start()</code> – begins collecting outputs and calls <code class="language-plaintext highlighter-rouge">NavFlow.start()</code>.</li>
-  <li><code class="language-plaintext highlighter-rouge">send(event)</code> / <code class="language-plaintext highlighter-rouge">pop()</code> / <code class="language-plaintext highlighter-rouge">assertCanPop()</code> – manipulate the stack.</li>
-  <li><code class="language-plaintext highlighter-rouge">assertTopNodeTag</code>, <code class="language-plaintext highlighter-rouge">assertStackSize</code>, <code class="language-plaintext highlighter-rouge">assertStackTags</code> – synchronous assertions.</li>
-  <li><code class="language-plaintext highlighter-rouge">awaitTopNodeIs&lt;T&gt;()</code>, <code class="language-plaintext highlighter-rouge">awaitStackSize</code>, <code class="language-plaintext highlighter-rouge">awaitStackTags</code> – suspend until NavFlow reaches a state.</li>
-  <li><code class="language-plaintext highlighter-rouge">awaitNextOutput</code>, <code class="language-plaintext highlighter-rouge">awaitMappedOutput</code>, <code class="language-plaintext highlighter-rouge">awaitOutputOfType&lt;T&gt;()</code> – wait for outputs.</li>
-  <li><code class="language-plaintext highlighter-rouge">launchScript(onTrace) { … }</code> – run NavFlow scripts in tests.</li>
-  <li><code class="language-plaintext highlighter-rouge">finish()</code> – cancel collectors and dispose NavFlow.</li>
+  <li><code class="language-plaintext highlighter-rouge">start()</code> - begins collecting outputs and calls <code class="language-plaintext highlighter-rouge">NavFlow.start()</code>.</li>
+  <li><code class="language-plaintext highlighter-rouge">send(event)</code> / <code class="language-plaintext highlighter-rouge">pop()</code> / <code class="language-plaintext highlighter-rouge">assertCanPop()</code> - manipulate the stack.</li>
+  <li><code class="language-plaintext highlighter-rouge">assertTopNodeTag</code>, <code class="language-plaintext highlighter-rouge">assertStackSize</code>, <code class="language-plaintext highlighter-rouge">assertStackTags</code> - synchronous assertions.</li>
+  <li><code class="language-plaintext highlighter-rouge">awaitTopNodeIs&lt;T&gt;()</code>, <code class="language-plaintext highlighter-rouge">awaitStackSize</code>, <code class="language-plaintext highlighter-rouge">awaitStackTags</code> - suspend until NavFlow reaches a state.</li>
+  <li><code class="language-plaintext highlighter-rouge">awaitNextOutput</code>, <code class="language-plaintext highlighter-rouge">awaitMappedOutput</code>, <code class="language-plaintext highlighter-rouge">awaitOutputOfType&lt;T&gt;()</code> - wait for outputs.</li>
+  <li><code class="language-plaintext highlighter-rouge">launchScript(onTrace) { ... }</code> - run NavFlow scripts in tests.</li>
+  <li><code class="language-plaintext highlighter-rouge">finish()</code> - cancel collectors and dispose NavFlow.</li>
 </ul>
 
 <p>Factory helpers: <code class="language-plaintext highlighter-rouge">NavFlowFactory.createTestScenario(scope)</code> builds a new runtime per test.</p>
@@ -374,7 +381,7 @@ Android/iOS/Desktop).</li>
       <td>Display loading/success/error state while running suspending work.</td>
     </tr>
     <tr>
-      <td><code class="language-plaintext highlighter-rouge">trace { … }</code></td>
+      <td><code class="language-plaintext highlighter-rouge">trace { ... }</code></td>
       <td>Send debug logs via <code class="language-plaintext highlighter-rouge">onTrace</code> callback passed to <code class="language-plaintext highlighter-rouge">runScript</code> / <code class="language-plaintext highlighter-rouge">launchNavFlowScript</code>.</td>
     </tr>
   </tbody>

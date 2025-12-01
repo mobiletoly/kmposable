@@ -125,6 +125,9 @@ Highlights:
   one-off effects stream (analytics, toasts) separate from navigation outputs. In Compose, collect
   them with `CollectEffects(node) { effect -> /* show snackbar / log */ }` to keep hosts lean and
   lifecycle-aware.
+- **Result-only subflows** – extend `ResultOnlyNode<STATE, EVENT, RESULT>` when a screen should only
+  return a result (OUTPUT = Nothing). Push it with `pushAndAwaitResultOnly` / `launchPushAndAwaitResultOnly`
+  so you don't have to thread the NavFlow's OUT through result-only nodes.
 
 For scripts specifically, see [NavFlow Scripts]({{ site.baseurl }}/guides/flowscripts/) and the
 [Cookbook]({{ site.baseurl }}/cookbook/).

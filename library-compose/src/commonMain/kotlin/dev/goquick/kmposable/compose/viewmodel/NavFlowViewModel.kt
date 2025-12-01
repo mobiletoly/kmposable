@@ -22,6 +22,7 @@ import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.runtime.NavFlow
 import kotlin.reflect.KClass
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.cancel
 
 /**
  * Base [ViewModel] that owns a [NavFlow] instance and automatically
@@ -143,5 +144,24 @@ inline fun <reified VM, OUT : Any> kmposableViewModelFromDi(): VM
     return navFlowViewModel {
         @Suppress("UNCHECKED_CAST")
         factory.create(VM::class) as VM
+    }
+}
+
+/**
+ * Helper to create and remember a [NavFlowViewModel] that owns a [NavFlow] built from the provided
+ * [factory]. The NavFlow survives configuration changes and is disposed when the ViewModel clears.
+ */
+@Composable
+fun <OUT : Any> rememberNavFlowViewModel(
+    factory: (kotlinx.coroutines.CoroutineScope) -> NavFlow<OUT, *>
+): NavFlowViewModel<OUT> = navFlowViewModel {
+    val flowScope = kotlinx.coroutines.CoroutineScope(
+        kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main
+    )
+    object : NavFlowViewModel<OUT>(factory(flowScope)) {
+        override fun onCleared() {
+            super.onCleared()
+            flowScope.cancel()
+        }
     }
 }

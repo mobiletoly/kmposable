@@ -9,14 +9,14 @@ repository - each section below links to source directories.
 
 ## Core Primitives (`library-core/src/commonMain/kotlin/dev/goquick/kmposable/core`)
 
-| Type                                                     | Purpose                                                                                                        |
-|----------------------------------------------------------|----------------------------------------------------------------------------------------------------------------|
-| `Node<STATE, EVENT, OUTPUT>`                             | Minimal interface (state `StateFlow`, `onEvent`, outputs `Flow`).                                              |
-| `LifecycleAwareNode`                                     | Optional hooks (`onAttach`, `onDetach`) invoked when NavFlow pushes/pops nodes.                                |
-| `StatefulNode`                                           | Base class that manages state via `MutableStateFlow`, exposes `updateState`, `emitOutput`.                     |
-| `DelegatingNode`                                         | Wraps another node and delegates everything by default - override only the parts you need (e.g., map outputs). |
-| `EffectSource` / `EffectfulStatefulNode`                 | Opt-in effects channel for one-off side effects (analytics, toasts, etc.) separate from outputs.               |
-| `ResultNode`, `ResultfulStatefulNode`, `KmposableResult` | Opt-in "start for result" contract; `ResultfulStatefulNode` provides the flow + emit helpers.                  |
+| Type                                                                       | Purpose                                                                                                                                                               |
+|----------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Node<STATE, EVENT, OUTPUT>`                                               | Minimal interface (state `StateFlow`, `onEvent`, outputs `Flow`).                                                                                                     |
+| `LifecycleAwareNode`                                                       | Optional hooks (`onAttach`, `onDetach`) invoked when NavFlow pushes/pops nodes.                                                                                       |
+| `StatefulNode`                                                             | Base class that manages state via `MutableStateFlow`, exposes `updateState`, `emitOutput`.                                                                            |
+| `DelegatingNode`                                                           | Wraps another node and delegates everything by default - override only the parts you need (e.g., map outputs).                                                        |
+| `EffectSource` / `EffectfulStatefulNode`                                   | Opt-in effects channel for one-off side effects (analytics, toasts, etc.) separate from outputs.                                                                      |
+| `ResultNode`, `ResultfulStatefulNode`, `ResultOnlyNode`, `KmposableResult` | Opt-in "start for result" contract; `ResultfulStatefulNode` provides the flow + emit helpers; `ResultOnlyNode` is the OUTPUT=Nothing variant for result-only screens. |
 
 ## Navigation Runtime (`library-core/runtime`)
 
@@ -34,7 +34,8 @@ repository - each section below links to source directories.
   `NavFlow.launchNavFlowScript(scope, onTrace, script)`
   or the `runScript` alias (SimpleNavFlow variants provided).
 - Helpers: `runCatchingNodeCall`, `awaitOutputCase`, `pushForResult`,
-  `pushAndAwaitResult(factory/onResult)`,
+  `pushAndAwaitResult(factory/onResult)`, result-only helpers `pushAndAwaitResultOnly` /
+  `launchPushAndAwaitResultOnly`,
   safe stack ops `pushIfStarted`/`popIfStarted`, `withNode`, etc.
 
 ## Compose Adapters (`library-compose`)
