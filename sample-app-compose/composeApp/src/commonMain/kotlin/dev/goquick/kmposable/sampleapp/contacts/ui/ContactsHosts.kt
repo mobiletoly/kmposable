@@ -35,11 +35,9 @@ fun ContactsListHost(node: ContactsListNode) {
 fun ContactDetailsHost(node: ContactDetailsNode) {
     val state by node.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // One-shot effects (toast/snackbar) are handled here so the Screen stays stateless.
     CollectEffects(node) { effect ->
-        when (effect) {
-            is ContactDetailsEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.text)
+        if (effect is ContactDetailsEffect.ShowMessage) {
+            snackbarHostState.showSnackbar(effect.text)
         }
     }
 
@@ -58,10 +56,9 @@ fun ContactDetailsHost(node: ContactDetailsNode) {
 fun EditContactHost(node: EditContactNode) {
     val state by node.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-
     CollectEffects(node) { effect ->
-        when (effect) {
-            is EditContactEffect.ShowMessage -> snackbarHostState.showSnackbar(effect.text)
+        if (effect is EditContactEffect.ShowMessage) {
+            snackbarHostState.showSnackbar(effect.text)
         }
     }
 

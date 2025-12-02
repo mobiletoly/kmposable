@@ -22,6 +22,7 @@ import dev.goquick.kmposable.core.nav.KmposableNavState
 import dev.goquick.kmposable.core.nav.KmposableNavigator
 import dev.goquick.kmposable.core.nav.KmposableStackEntry
 import dev.goquick.kmposable.core.nav.KmposableStackNavigator
+import dev.goquick.kmposable.core.logging.NavFlowLogger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -43,7 +44,8 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     rootNode: Node<*, *, OUT>,
     navigatorFactory: (ENTRY) -> KmposableNavigator<OUT, ENTRY> = { entry ->
         KmposableStackNavigator(entry)
-    }
+    },
+    private val logger: NavFlowLogger<OUT>? = null
 ) {
 
     /** Backing navigator implementation used to mutate the stack. */
@@ -69,6 +71,7 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         if (started) return
         started = true
         attachNode(currentTopNode())
+        logger?.onStackChanged(navState.value)
     }
 
     /** Returns the current top node (helpful for tests/adapters). */
@@ -80,6 +83,7 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         val entry = createEntry(node)
         navigator.push(entry)
         attachNode(node)
+        logger?.onStackChanged(navState.value)
     }
 
     /**
@@ -100,6 +104,7 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         ensureStarted()
         val removed = navigator.pop()
         removed?.let { detachNode(it.node) }
+        if (removed != null) logger?.onStackChanged(navState.value)
         return removed != null
     }
 
@@ -118,6 +123,7 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         val removed = navigator.replaceAll(entry)
         removed.forEach { detachNode(it.node) }
         attachNode(node)
+        logger?.onStackChanged(navState.value)
     }
 
     /** Replaces only the top-most entry. */
@@ -126,12 +132,14 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         val entry = createEntry(node)
         navigator.replaceTop(entry)?.let { detachNode(it.node) }
         attachNode(node)
+        logger?.onStackChanged(navState.value)
     }
 
     /** Pops every entry above the root element. */
     fun popAll() {
         ensureStarted()
         navigator.popAll().forEach { detachNode(it.node) }
+        logger?.onStackChanged(navState.value)
     }
 
     /** Pops nodes until [target] is on top, optionally removing [target] as well. */
@@ -139,6 +147,7 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         ensureStarted()
         val targetEntry = findEntryForNode(target) ?: return
         navigator.popTo(targetEntry, inclusive).forEach { detachNode(it.node) }
+        logger?.onStackChanged(navState.value)
     }
 
     /** Indicates whether the stack has more than one entry. */
@@ -180,12 +189,14 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     protected open fun attachNode(node: Node<*, *, OUT>) {
         (node as? LifecycleAwareNode)?.onAttach()
         observeNodeOutputs(node)
+        logger?.onAttach(node)
     }
 
     /** Called right before a node leaves the stack. */
     protected open fun detachNode(node: Node<*, *, OUT>) {
         stopObservingNode(node)
         (node as? LifecycleAwareNode)?.onDetach()
+        logger?.onDetach(node)
     }
 
     protected open fun observeNodeOutputs(node: Node<*, *, OUT>) {
@@ -193,6 +204,7 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         if (outputCollectors.containsKey(token)) return
         val job = appScope.launch(start = CoroutineStart.UNDISPATCHED) {
             node.outputs.collect { output ->
+                logger?.onOutput(node, output)
                 emitRuntimeOutput(output)
                 onNodeOutput(node, output)
             }

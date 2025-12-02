@@ -17,6 +17,12 @@ repository - each section below links to source directories.
 | `DelegatingNode`                                                           | Wraps another node and delegates everything by default - override only the parts you need (e.g., map outputs).                                                        |
 | `EffectSource` / `EffectfulStatefulNode`                                   | Opt-in effects channel for one-off side effects (analytics, toasts, etc.) separate from outputs.                                                                      |
 | `ResultNode`, `ResultfulStatefulNode`, `ResultOnlyNode`, `KmposableResult` | Opt-in "start for result" contract; `ResultfulStatefulNode` provides the flow + emit helpers; `ResultOnlyNode` is the OUTPUT=Nothing variant for result-only screens. |
+| `runCatchingState`                                                         | Helper on `StatefulNode` to standardize loading/success/error updates around suspending calls (reducers for start/success/error).                                      |
+| `mirrorChildState`                                                         | Helper on `StatefulNode` to mirror a child `StateFlow` into parent state via a mapper.                                                                                |
+| `runCatchingState`                                                         | Helper on `StatefulNode` to standardize loading/success/error updates around suspending calls (reducers for start/success/error).                                      |
+| `mirrorChildState`                                                         | Helper on `StatefulNode` to mirror a child `StateFlow` into parent state via a mapper.                                                                                |
+| `runCatchingState`                                                         | Helper on `StatefulNode` to standardize loading/success/error updates around suspending calls (reducers for start/success/error).                                      |
+| `mirrorChildState`                                                         | Helper on `StatefulNode` to mirror a child `StateFlow` into parent state via a mapper.                                                                                |
 
 ## Navigation Runtime (`library-core/runtime`)
 
@@ -47,8 +53,20 @@ repository - each section below links to source directories.
 - `KmposableBackHandler` - expect/actual back handling that delegates to NavFlow (
   Android/iOS/Desktop).
 - `CollectEffects(node) { ... }` - lifecycle-aware helper to collect `EffectSource.effects` in
-  Compose
-  and route them to UI (e.g., snackbar, dialog, logging).
+  Compose and route them to UI (e.g., snackbar, dialog, logging).
+- `rememberNode` / `NodeHost` - create/host standalone nodes (not managed by NavFlow) with automatic
+  attach/detach and state collection; optionally collect outputs inline.
+- `rememberOverlayNavFlow` + `OverlayNavFlowHost` - overlay-only stacks without dummy roots.
+- `rememberOverlayController` + `OverlayHost` - bundle overlay NavFlow creation, push/await helpers,
+  and hosting (defaults to fade in/out; works with `Presentation.Overlay` nodes).
+- `AutoCloseOverlay` - opt-in marker for overlay result nodes; hosts pop the overlay once a result
+  is emitted (`Ok`/`Canceled` by default). Complements `autoPop = true` (caller-driven pop) by
+  covering fire-and-forget launches or `autoPop = false`.
+- `FlowTestScenario.pushOverlayResult(autoPop)` - test helper to push a result-only overlay and
+  await its `KmposableResult` headlessly.
+- `NavFlowLogger` / `NodeErrorLogger` - optional hooks for logging telemetry (attach/detach/output)
+  and node-level errors without threading loggers through every host.
+- `OverlayNavFlowHost` respects per-node animation hints via `OverlayAnimationAware` if provided.
 
 ## Testing (`library-test`)
 
@@ -60,6 +78,8 @@ repository - each section below links to source directories.
 - `awaitTopNodeIs<T>()`, `awaitStackSize`, `awaitStackTags` - suspend until NavFlow reaches a state.
 - `awaitNextOutput`, `awaitMappedOutput`, `awaitOutputOfType<T>()` - wait for outputs.
 - `launchScript(onTrace) { ... }` - run NavFlow scripts in tests.
+- `pushResultNode(factory, autoPop)` - push a result node, await `KmposableResult`, optional auto-pop
+  (handy for dialogs/overlays/subflows).
 - `finish()` - cancel collectors and dispose NavFlow.
 
 Factory helpers: `NavFlowFactory.createTestScenario(scope)` builds a new runtime per test.

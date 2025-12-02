@@ -46,8 +46,22 @@ class EditContactNode(
             updateState { it.copy(error = validationError) }
             return
         }
-        updateState { it.copy(isSaving = true, error = null) }
-        try {
+        val result = runCatchingState(
+            onStart = { it.copy(isSaving = true, error = null) },
+            onEach = { state, contact ->
+                state.copy(
+                    isSaving = false,
+                    error = null,
+                    generatedId = contact.id.raw,
+                    name = contact.name,
+                    phone = contact.phone,
+                    email = contact.email
+                )
+            },
+            onError = { state, error ->
+                state.copy(isSaving = false, error = error.message ?: "Failed to save contact")
+            }
+        ) {
             val contact = Contact(
                 id = existingContact?.id ?: ContactId(current.generatedId ?: randomId()),
                 name = current.name.trim(),
@@ -55,10 +69,13 @@ class EditContactNode(
                 email = current.email?.trim().takeUnless { it.isNullOrBlank() }
             )
             repository.upsert(contact)
+            contact
+        }
+
+        result.onSuccess { contact ->
             emitEffect(EditContactEffect.ShowMessage("Saved"))
             emitResult(KmposableResult.Ok(contact))
-        } catch (t: Throwable) {
-            updateState { it.copy(isSaving = false, error = t.message ?: "Failed to save contact") }
+        }.onFailure {
             emitEffect(EditContactEffect.ShowMessage("Failed to save contact"))
         }
     }

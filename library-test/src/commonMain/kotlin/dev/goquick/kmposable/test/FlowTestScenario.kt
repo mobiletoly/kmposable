@@ -198,6 +198,18 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         script: suspend NavFlowScriptScope<OUT, ENTRY>.() -> Unit
     ): Job = navFlow.launchNavFlowScript(scope, onTrace, script)
 
+    /**
+     * Pushes a temporary result node, awaits its first result, optionally pops it, and returns
+     * the [KmposableResult]. Useful for testing dialog/sheet overlays or subflows.
+     */
+    suspend fun <RESULT : Any> pushResultNode(
+        autoPop: Boolean = true,
+        factory: () -> ResultNode<RESULT>
+    ): KmposableResult<RESULT> {
+        check(started) { "Call start() before pushing nodes." }
+        return navFlow.pushAndAwaitResult(factory = factory, autoPop = autoPop)
+    }
+
     /** Suspends until [mapper] produces a value from the next output and returns it. */
     suspend fun <T : Any> awaitMappedOutput(
         timeoutMillis: Long = 1_000,
@@ -217,6 +229,17 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     suspend inline fun <reified T : OUT> awaitOutputOfType(
         timeoutMillis: Long = 1_000
     ): T = awaitMappedOutput(timeoutMillis) { output -> output as? T }
+
+    /**
+     * Convenience for overlay/result dialogs: push a [ResultNode] that is expected to be
+     * `Presentation.Overlay`, await its first [KmposableResult], and optionally pop afterwards.
+     *
+     * This mirrors host-side `pushAndAwaitResult(autoPop)` but keeps tests headless.
+     */
+    suspend fun <RESULT : Any> pushOverlayResult(
+        autoPop: Boolean = true,
+        factory: () -> ResultNode<RESULT>
+    ): KmposableResult<RESULT> = pushResultNode(autoPop = autoPop, factory = factory)
 
     /**
      * Awaits a typed result from a [ResultNode] currently on top of the stack. If the node leaves

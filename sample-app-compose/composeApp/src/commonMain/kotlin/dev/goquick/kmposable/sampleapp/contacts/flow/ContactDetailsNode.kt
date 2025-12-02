@@ -46,22 +46,23 @@ class ContactDetailsNode(
     }
 
     private suspend fun loadContact() {
-        updateState { it.copy(isLoading = true, error = null) }
-        try {
-            val contact = repository.getById(contactId)
-            updateState {
-                it.copy(
+        runCatchingState(
+            onStart = { it.copy(isLoading = true, error = null) },
+            onEach = { state, contact ->
+                state.copy(
                     isLoading = false,
                     contact = contact,
                     error = if (contact == null) "Contact not found" else null
                 )
+            },
+            onError = { state, error ->
+                state.copy(
+                    isLoading = false,
+                    error = error.message ?: "Unable to load contact"
+                )
             }
-        } catch (t: Throwable) {
-            updateState {
-                it.copy(isLoading = false, error = t.message ?: "Unable to load contact")
-            }
-            emitEffect(ContactDetailsEffect.ShowMessage("Unable to load contact"))
-        }
+        ) { repository.getById(contactId) }
+            .onFailure { emitEffect(ContactDetailsEffect.ShowMessage("Unable to load contact")) }
     }
 }
 

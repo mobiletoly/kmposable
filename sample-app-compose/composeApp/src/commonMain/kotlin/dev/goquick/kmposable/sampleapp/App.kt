@@ -8,7 +8,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavHostController
@@ -19,10 +18,12 @@ import androidx.navigation.compose.rememberNavController
 import dev.goquick.kmposable.compose.NavFlowHost
 import dev.goquick.kmposable.compose.nodeRenderer
 import dev.goquick.kmposable.compose.rememberNavFlow
+import dev.goquick.kmposable.compose.rememberNode
 import dev.goquick.kmposable.sampleapp.contacts.Contact
 import dev.goquick.kmposable.sampleapp.contacts.ContactId
 import dev.goquick.kmposable.sampleapp.contacts.InMemoryContactsRepository
 import dev.goquick.kmposable.sampleapp.contacts.flow.ContactDetailsNode
+import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsFlowEvent
 import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsListNode
 import dev.goquick.kmposable.sampleapp.contacts.flow.ContactsNavFlow
 import dev.goquick.kmposable.sampleapp.contacts.flow.EditContactNode
@@ -90,8 +91,7 @@ private fun ContactsDestination(
 
 @Composable
 private fun SettingsDestination() {
-    val scope = rememberCoroutineScope()
-    val node = remember { SettingsNode(parentScope = scope) }
+    val node = rememberNode { scope -> SettingsNode(parentScope = scope) }
 
     SettingsHost(node)
 }

@@ -16,6 +16,7 @@
 package dev.goquick.kmposable.core
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 /**
  * Convenience base class that wires [Node] boilerplate: mutable state, outputs, and a child scope
@@ -35,12 +37,14 @@ import kotlinx.coroutines.flow.update
  * @param id Optional debug identifier propagated into nav stack entries (useful in tests/logs).
  * @param outputBufferSize Extra capacity for [outputs]. Emitting more outputs than this buffer
  * allows will suspend [emitOutput] or make [tryEmitOutput] return false.
+ * @param errorLogger Optional hook for surfacing unexpected exceptions.
  */
 abstract class StatefulNode<STATE : Any, EVENT : Any, OUTPUT : Any>(
     parentScope: CoroutineScope,
     initialState: STATE,
     val id: String? = null,
-    outputBufferSize: Int = 1
+    outputBufferSize: Int = 1,
+    private val errorLogger: dev.goquick.kmposable.core.logging.NodeErrorLogger? = null
 ) : Node<STATE, EVENT, OUTPUT>, LifecycleAwareNode {
 
     /** Job that ties the node's child scope to the parent app scope. */
@@ -86,5 +90,42 @@ abstract class StatefulNode<STATE : Any, EVENT : Any, OUTPUT : Any>(
     protected open fun onCleared() {}
 
     /** Hook for surfacing unexpected exceptions (logging, error state, etc.). */
-    protected open fun handleException(error: Throwable) {}
+    protected open fun handleException(error: Throwable) {
+        errorLogger?.onNodeError(this, error)
+    }
+
+    /**
+     * Convenience wrapper around [runCatching] that applies state reducers for start/success/failure.
+     *
+     * @param onStart reducer applied before invoking [block] (e.g., set loading = true).
+     * @param onEach reducer applied when [block] succeeds with a value.
+     * @param onError reducer applied when [block] throws.
+     */
+    protected suspend fun <R> runCatchingState(
+        onStart: (STATE) -> STATE = { it },
+        onEach: (STATE, R) -> STATE,
+        onError: (STATE, Throwable) -> STATE = { state, _ -> state },
+        block: suspend () -> R
+    ): Result<R> {
+        updateState(onStart)
+        val result = runCatching { block() }
+        result.fold(
+            onSuccess = { value -> updateState { current -> onEach(current, value) } },
+            onFailure = { error -> updateState { current -> onError(current, error) } }
+        )
+        return result
+    }
+
+    /**
+     * Mirrors a child [StateFlow] into this node's state by applying [map] whenever the child emits.
+     * Collection runs on the node scope and starts immediately.
+     */
+    fun <CHILD_STATE : Any> mirrorChildState(
+        childState: StateFlow<CHILD_STATE>,
+        map: (STATE, CHILD_STATE) -> STATE
+    ): Job = scope.launch(start = CoroutineStart.UNDISPATCHED) {
+        childState.collect { child ->
+            updateState { parent -> map(parent, child) }
+        }
+    }
 }

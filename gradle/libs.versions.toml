@@ -8,6 +8,7 @@ androidx-test-runner = "1.7.0"
 androidx-test-core = "1.7.0"
 androidx-lifecycle = "2.10.0"
 kotlinx-coroutines = "1.10.2"
+robolectric = "4.12.2"
 
 androidMinSdk = "26"
 androidCompileSdk = "36"
@@ -26,6 +27,7 @@ kotlinxCoroutinesSwing = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-sw
 kotlinxCoroutinesCore = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinxCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinx-coroutines" }
 kotlinTest = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 [plugins]
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }

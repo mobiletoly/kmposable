@@ -64,4 +64,7 @@ NavFlowHost(navFlow = navFlow, renderer = renderer)
 - Put persistent errors in state; use effects for one-shot signals (snackbar/toast/nav).
 - Result-only overlays: use `presentation = Presentation.Overlay` on nodes and render via `OverlayNavFlowHost`; register with `registerResultOnly`.
 - Keep hosts thin; if wiring grows (subflows, DI helpers), extract small helpers rather than bloating screens.
+- Parent/child state sync: when a parent owns a child node and needs to mirror its state, use
+  `mirrorChildState(child.state) { parent, child -> parent.copy(childState = child) }` inside the
+  parent node instead of manual plumbing.
 - Tests exercise nodes/navflow directly via `FlowTestScenario`; screens stay trivial to preview.

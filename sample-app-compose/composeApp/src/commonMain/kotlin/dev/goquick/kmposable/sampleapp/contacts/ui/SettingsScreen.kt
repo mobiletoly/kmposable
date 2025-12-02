@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -20,6 +21,7 @@ import dev.goquick.kmposable.sampleapp.settings.SettingsState
 fun SettingsScreen(
     state: SettingsState,
     onEvent: (SettingsEvent) -> Unit,
+    onShowOverlay: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier) {
@@ -35,6 +37,11 @@ fun SettingsScreen(
                     checked = state.allowSync,
                     onCheckedChange = { onEvent(SettingsEvent.AllowSyncChanged(it)) }
                 )
+            }
+            if (onShowOverlay != null) {
+                Button(onClick = onShowOverlay) {
+                    Text("Show overlay")
+                }
             }
         }
     }

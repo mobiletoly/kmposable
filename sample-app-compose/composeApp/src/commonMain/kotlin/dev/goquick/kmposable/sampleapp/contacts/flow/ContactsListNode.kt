@@ -37,18 +37,16 @@ class ContactsListNode(
     }
 
     private suspend fun refreshContacts() {
-        updateState { it.copy(isLoading = true, error = null) }
-        try {
-            val contacts = repository.getAll()
-            updateState { it.copy(isLoading = false, contacts = contacts) }
-        } catch (t: Throwable) {
-            updateState {
-                it.copy(
+        runCatchingState(
+            onStart = { it.copy(isLoading = true, error = null) },
+            onEach = { state, contacts -> state.copy(isLoading = false, contacts = contacts) },
+            onError = { state, error ->
+                state.copy(
                     isLoading = false,
-                    error = t.message ?: "Unable to load contacts"
+                    error = error.message ?: "Unable to load contacts"
                 )
             }
-        }
+        ) { repository.getAll() }
     }
 }
 
