@@ -48,7 +48,7 @@ class ContactDetailsNode(
     private suspend fun loadContact() {
         runCatchingState(
             onStart = { it.copy(isLoading = true, error = null) },
-            onEach = { state, contact ->
+            onSuccess = { state, contact ->
                 state.copy(
                     isLoading = false,
                     contact = contact,

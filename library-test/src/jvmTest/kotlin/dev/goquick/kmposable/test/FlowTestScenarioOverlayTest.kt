@@ -10,8 +10,11 @@ import dev.goquick.kmposable.runtime.NavFlow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class FlowTestScenarioOverlayTest {
 
     @Test
@@ -27,6 +30,8 @@ class FlowTestScenarioOverlayTest {
 
         assertEquals(KmposableResult.Ok("overlay"), result)
         assertEquals(1, navFlow.navState.value.size)
+        scenario.finish()
+        advanceUntilIdle()
     }
 
     private class BaseNode(scope: kotlinx.coroutines.CoroutineScope) :

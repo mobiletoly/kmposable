@@ -23,6 +23,7 @@ import dev.goquick.kmposable.runtime.NavFlow
 import dev.goquick.kmposable.runtime.NavFlowFactory
 import dev.goquick.kmposable.runtime.NavFlowScriptScope
 import dev.goquick.kmposable.runtime.launchNavFlowScript
+import dev.goquick.kmposable.runtime.pushAndAwaitResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job

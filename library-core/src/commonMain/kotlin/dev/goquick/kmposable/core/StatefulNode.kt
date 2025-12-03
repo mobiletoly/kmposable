@@ -98,19 +98,19 @@ abstract class StatefulNode<STATE : Any, EVENT : Any, OUTPUT : Any>(
      * Convenience wrapper around [runCatching] that applies state reducers for start/success/failure.
      *
      * @param onStart reducer applied before invoking [block] (e.g., set loading = true).
-     * @param onEach reducer applied when [block] succeeds with a value.
+     * @param onSuccess reducer applied when [block] succeeds with a value.
      * @param onError reducer applied when [block] throws.
      */
     protected suspend fun <R> runCatchingState(
         onStart: (STATE) -> STATE = { it },
-        onEach: (STATE, R) -> STATE,
+        onSuccess: (STATE, R) -> STATE,
         onError: (STATE, Throwable) -> STATE = { state, _ -> state },
         block: suspend () -> R
     ): Result<R> {
         updateState(onStart)
         val result = runCatching { block() }
         result.fold(
-            onSuccess = { value -> updateState { current -> onEach(current, value) } },
+            onSuccess = { value -> updateState { current -> onSuccess(current, value) } },
             onFailure = { error -> updateState { current -> onError(current, error) } }
         )
         return result

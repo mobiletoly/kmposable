@@ -48,7 +48,7 @@ class EditContactNode(
         }
         val result = runCatchingState(
             onStart = { it.copy(isSaving = true, error = null) },
-            onEach = { state, contact ->
+            onSuccess = { state, contact ->
                 state.copy(
                     isSaving = false,
                     error = null,

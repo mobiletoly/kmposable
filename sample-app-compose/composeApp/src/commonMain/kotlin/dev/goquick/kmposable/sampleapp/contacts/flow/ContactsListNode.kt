@@ -39,7 +39,7 @@ class ContactsListNode(
     private suspend fun refreshContacts() {
         runCatchingState(
             onStart = { it.copy(isLoading = true, error = null) },
-            onEach = { state, contacts -> state.copy(isLoading = false, contacts = contacts) },
+            onSuccess = { state, contacts -> state.copy(isLoading = false, contacts = contacts) },
             onError = { state, error ->
                 state.copy(
                     isLoading = false,
