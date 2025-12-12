@@ -152,16 +152,34 @@ inline fun <reified VM, OUT : Any> kmposableViewModelFromDi(): VM
  * [factory]. The NavFlow survives configuration changes and is disposed when the ViewModel clears.
  */
 @Composable
-fun <OUT : Any> rememberNavFlowViewModel(
+expect fun <OUT : Any> rememberNavFlowViewModel(
     factory: (kotlinx.coroutines.CoroutineScope) -> NavFlow<OUT, *>
-): NavFlowViewModel<OUT> = navFlowViewModel {
+): NavFlowViewModel<OUT>
+
+/**
+ * Named class (not local/anonymous) so AndroidX can key it as a ViewModel.
+ *
+ * Android throws `IllegalArgumentException: Local and anonymous classes can not be ViewModels`
+ * when the ViewModel `modelClass` is an anonymous `object : ViewModel { ... }`.
+ */
+internal class RememberNavFlowViewModel<OUT : Any>(
+    private val flowScope: kotlinx.coroutines.CoroutineScope,
+    navFlow: NavFlow<OUT, *>,
+) : NavFlowViewModel<OUT>(navFlow) {
+    override fun onCleared() {
+        super.onCleared()
+        flowScope.cancel()
+    }
+}
+
+internal fun <OUT : Any> createRememberNavFlowViewModel(
+    factory: (kotlinx.coroutines.CoroutineScope) -> NavFlow<OUT, *>
+): RememberNavFlowViewModel<OUT> {
     val flowScope = kotlinx.coroutines.CoroutineScope(
         kotlinx.coroutines.SupervisorJob() + kotlinx.coroutines.Dispatchers.Main
     )
-    object : NavFlowViewModel<OUT>(factory(flowScope)) {
-        override fun onCleared() {
-            super.onCleared()
-            flowScope.cancel()
-        }
-    }
+    return RememberNavFlowViewModel(
+        flowScope = flowScope,
+        navFlow = factory(flowScope),
+    )
 }

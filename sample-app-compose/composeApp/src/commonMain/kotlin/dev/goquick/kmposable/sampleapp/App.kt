@@ -17,8 +17,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import dev.goquick.kmposable.compose.NavFlowHost
 import dev.goquick.kmposable.compose.nodeRenderer
-import dev.goquick.kmposable.compose.rememberNavFlow
 import dev.goquick.kmposable.compose.rememberNode
+import dev.goquick.kmposable.compose.viewmodel.rememberNavFlowViewModel
 import dev.goquick.kmposable.sampleapp.contacts.Contact
 import dev.goquick.kmposable.sampleapp.contacts.ContactId
 import dev.goquick.kmposable.sampleapp.contacts.InMemoryContactsRepository
@@ -73,9 +73,11 @@ fun App() {
 private fun ContactsDestination(
     repository: InMemoryContactsRepository
 ) {
-    val navFlow = rememberNavFlow(key = repository) { scope ->
+    // Use a ViewModel-backed flow so the nav stack survives configuration changes.
+    val navFlowVm = rememberNavFlowViewModel<ContactsFlowEvent> { scope ->
         ContactsNavFlow(repository = repository, appScope = scope)
     }
+    val navFlow = navFlowVm.navFlow
 
     // Renderer maps nodes → hosts. Hosts then wire state/effects to pure Screens.
     val renderer = remember {
