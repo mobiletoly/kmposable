@@ -1,14 +1,10 @@
 package dev.goquick.kmposable.sampleapp.contacts.ui
 
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.padding
 import dev.goquick.kmposable.compose.CollectEffects
 import dev.goquick.kmposable.sampleapp.contacts.flow.ContactDetailsEffect
 import dev.goquick.kmposable.sampleapp.contacts.flow.ContactDetailsNode
@@ -32,43 +28,39 @@ fun ContactsListHost(node: ContactsListNode) {
 }
 
 @Composable
-fun ContactDetailsHost(node: ContactDetailsNode) {
+fun ContactDetailsHost(
+    node: ContactDetailsNode,
+    snackbarHostState: SnackbarHostState
+) {
     val state by node.state.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     CollectEffects(node) { effect ->
         if (effect is ContactDetailsEffect.ShowMessage) {
             snackbarHostState.showSnackbar(effect.text)
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
-        ContactDetailsScreen(
-            state = state,
-            onEvent = node::onEvent,
-            modifier = Modifier.padding(paddingValues)
-        )
-    }
+    ContactDetailsScreen(
+        state = state,
+        onEvent = node::onEvent,
+        modifier = Modifier
+    )
 }
 
 @Composable
-fun EditContactHost(node: EditContactNode) {
+fun EditContactHost(
+    node: EditContactNode,
+    snackbarHostState: SnackbarHostState
+) {
     val state by node.state.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
     CollectEffects(node) { effect ->
         if (effect is EditContactEffect.ShowMessage) {
             snackbarHostState.showSnackbar(effect.text)
         }
     }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
-        EditContactScreen(
-            state = state,
-            onEvent = node::onEvent,
-            modifier = Modifier.padding(paddingValues)
-        )
-    }
+    EditContactScreen(
+        state = state,
+        onEvent = node::onEvent,
+        modifier = Modifier
+    )
 }

@@ -22,6 +22,7 @@ import dev.goquick.kmposable.core.nav.Presentation
 import dev.goquick.kmposable.core.nav.PresentationAware
 import dev.goquick.kmposable.core.nav.isOverlayPresentation
 import dev.goquick.kmposable.runtime.NavFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 
 /**
@@ -109,11 +110,12 @@ internal suspend fun <OUT : Any> runAutoCloseOverlay(
 ): Boolean {
     @Suppress("UNCHECKED_CAST")
     val typed = node as AutoCloseOverlay<Any>
-    val result = typed.result.firstOrNull() ?: return false
-    if (!typed.shouldAutoClose(result)) return false
+    typed.result.firstOrNull { result -> typed.shouldAutoClose(result) } ?: return false
+    val state = navFlow.navState.first { current ->
+        current.stack.none { it.node === node } || current.top === node
+    }
+    if (state.stack.none { it.node === node }) return false
     if (!navFlow.isStarted()) return false
-    val isStillTop = runCatching { navFlow.currentTopNode() === node }.getOrDefault(false)
-    if (!isStillTop) return false
     return navFlow.canPop() && navFlow.pop()
 }
 

@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import dev.goquick.kmposable.core.KmposableResult
+import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.core.ResultNode
 import dev.goquick.kmposable.core.nav.DefaultStackEntry
 import dev.goquick.kmposable.core.nav.KmposableStackEntry
@@ -25,23 +26,29 @@ class OverlayController<OUT : Any, ENTRY : KmposableStackEntry<OUT>> internal co
     val scope: CoroutineScope
 ) {
     /** Pushes an overlay and awaits its first result in the current coroutine. */
-    suspend fun <RESULT : Any> pushAndAwait(
-        factory: () -> ResultNode<RESULT>,
+    suspend fun <RESULT : Any, NODE> pushAndAwait(
+        factory: () -> NODE,
         autoPop: Boolean = true
-    ): KmposableResult<RESULT> = navFlow.pushAndAwaitResult(factory, autoPop)
+    ): KmposableResult<RESULT>
+        where NODE : Node<*, *, OUT>,
+              NODE : ResultNode<RESULT> = navFlow.pushAndAwaitResult(factory, autoPop)
 
     /** Launches an overlay in [scope], optionally auto-popping it on first result. */
-    fun <RESULT : Any> launch(
-        factory: () -> ResultNode<RESULT>,
+    fun <RESULT : Any, NODE> launch(
+        factory: () -> NODE,
         autoPop: Boolean = true,
         onResult: (KmposableResult<RESULT>) -> Unit = {}
-    ): Job = scope.launchPushAndAwaitResult(navFlow, factory, autoPop, onResult)
+    ): Job
+        where NODE : Node<*, *, OUT>,
+              NODE : ResultNode<RESULT> = scope.launchPushAndAwaitResult(navFlow, factory, autoPop, onResult)
 
     /** Convenience for overlays that return Unit; ignores the result payload. */
-    fun launch(
-        factory: () -> ResultNode<Unit>,
+    fun <NODE> launch(
+        factory: () -> NODE,
         autoPop: Boolean = true
-    ): Job = launch(factory, autoPop, onResult = {})
+    ): Job
+        where NODE : Node<*, *, OUT>,
+              NODE : ResultNode<Unit> = launch(factory, autoPop, onResult = {})
 }
 
 /**

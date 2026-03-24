@@ -8,6 +8,7 @@ import dev.goquick.kmposable.core.EffectSource
 import dev.goquick.kmposable.core.LifecycleAwareNode
 import dev.goquick.kmposable.core.Node
 import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.resume
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import org.junit.Ignore
@@ -124,7 +125,7 @@ private class TestFrameClock : MonotonicFrameClock, CoroutineContext.Element {
 
     override suspend fun <R> withFrameNanos(onFrame: (Long) -> R): R =
         kotlinx.coroutines.suspendCancellableCoroutine { cont ->
-            awaiters.trySend { time -> cont.resume(onFrame(time)) {} }
+            awaiters.trySend { time -> cont.resume(onFrame(time)) }
         }
 
     suspend fun sendFrame(timeNanos: Long = System.nanoTime()) {

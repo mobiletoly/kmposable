@@ -10,7 +10,9 @@ fun contacts_script_opens_details() = runTest {
     val scenario = contactsFactory.createTestScenario(this).start()
 
     val job = scenario.launchScript { runContactsFlow(fakeRepository, this@runTest) }
-    scenario.send(ContactsListEvent.ContactClicked(ContactId("42")))
+    scenario.updateTopNode<ContactsListNode> {
+        onEvent(ContactsListEvent.ContactClicked(ContactId("42")))
+    }
 
     scenario.awaitTopNodeIs<ContactDetailsNode>()
     job.cancelAndJoin()

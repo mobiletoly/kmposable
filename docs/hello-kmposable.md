@@ -40,7 +40,7 @@ class CounterNode(parentScope: CoroutineScope) :
 
 ```kotlin
 val navFlow = NavFlow(scope, CounterNode(scope)).apply { start() }
-navFlow.sendEvent(CounterEvent.Increment)
+navFlow.updateTopNode<CounterNode> { onEvent(CounterEvent.Increment) }
 println(navFlow.navState.value.top.state.value) // 1
 ```
 
@@ -71,7 +71,7 @@ fun counterIncrements() = runTest {
 
     factory.createTestScenario(this)
         .start()
-        .send(CounterEvent.Increment)
+        .updateTopNode<CounterNode> { onEvent(CounterEvent.Increment) }
         .apply {
             val top = navFlow.navState.value.top as CounterNode
             assertEquals(1, top.state.value)

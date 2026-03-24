@@ -49,6 +49,26 @@ class AutoCloseOverlayTest {
         job.cancel()
     }
 
+    @Test
+    fun waits_until_overlay_becomes_top_before_auto_closing() = runTest {
+        val navFlow = navFlowWithRoot()
+        val lowerOverlay = AutoClosingOverlayNode(backgroundScope)
+        val topOverlay = AutoClosingOverlayNode(backgroundScope)
+
+        navFlow.push(lowerOverlay)
+        navFlow.push(topOverlay)
+        val job = launch { runAutoCloseOverlay(navFlow, lowerOverlay) }
+
+        lowerOverlay.emit(KmposableResult.Ok(Unit))
+        advanceUntilIdle()
+        assertEquals(3, navFlow.navState.value.size)
+
+        navFlow.pop()
+        job.join()
+
+        assertEquals(1, navFlow.navState.value.size)
+    }
+
     private fun TestScope.navFlowWithRoot(): NavFlow<Unit, DefaultStackEntry<Unit>> {
         val navFlow = NavFlow<Unit, DefaultStackEntry<Unit>>(
             appScope = backgroundScope,

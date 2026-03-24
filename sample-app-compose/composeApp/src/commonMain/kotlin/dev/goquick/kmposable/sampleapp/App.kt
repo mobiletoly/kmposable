@@ -1,10 +1,13 @@
 package dev.goquick.kmposable.sampleapp
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -78,17 +81,24 @@ private fun ContactsDestination(
         ContactsNavFlow(repository = repository, appScope = scope)
     }
     val navFlow = navFlowVm.navFlow
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // Renderer maps nodes → hosts. Hosts then wire state/effects to pure Screens.
     val renderer = remember {
         nodeRenderer {
             register<ContactsListNode> { node -> ContactsListHost(node) }
-            register<ContactDetailsNode> { node -> ContactDetailsHost(node) }
-            register<EditContactNode> { node -> EditContactHost(node) }
+            register<ContactDetailsNode> { node -> ContactDetailsHost(node, snackbarHostState) }
+            registerResultOnly<EditContactNode> { node -> EditContactHost(node, snackbarHostState) }
         }
     }
 
-    NavFlowHost(navFlow = navFlow, renderer = renderer)
+    Scaffold(
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            NavFlowHost(navFlow = navFlow, renderer = renderer)
+        }
+    }
 }
 
 @Composable

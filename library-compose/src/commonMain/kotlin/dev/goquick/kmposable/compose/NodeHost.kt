@@ -10,7 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import dev.goquick.kmposable.core.LifecycleAwareNode
 import dev.goquick.kmposable.core.Node
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.collect
 
 /**
  * Remembers a [Node] instance tied to the composition. Useful for nodes that are *not* managed by a
@@ -50,7 +50,7 @@ fun <STATE : Any, EVENT : Any, OUTPUT : Any, NODE> NodeHost(
 
     onOutput?.let { handler ->
         LaunchedEffect(node, handler) {
-            node.outputs.collectLatest { handler(it) }
+            node.outputs.collect { handler(it) }
         }
     }
 

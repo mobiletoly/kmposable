@@ -4,6 +4,7 @@ import dev.goquick.kmposable.core.StatefulNode
 import dev.goquick.kmposable.runtime.NavFlow
 import dev.goquick.kmposable.runtime.SimpleNavFlowFactory
 import kotlin.test.Test
+import kotlin.test.assertFailsWith
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -23,9 +24,31 @@ class FlowTestScenarioTest {
         factory.createTestScenario(this)
             .start()
             .assertTopNodeTag("Root")
-            .send(TestEvent.Emit("next"))
+            .updateTopNode<RootNode> { onEvent(TestEvent.Emit("next")) }
             .assertNextOutput(TestOutput("next"))
             .finish()
+    }
+
+    @Test
+    fun scenario_updateTopNode_requires_started_scenario() = runTest {
+        val factory = SimpleNavFlowFactory<TestOutput> {
+            NavFlow(
+                appScope = this,
+                rootNode = RootNode(this)
+            )
+        }
+        val scenario = factory.createTestScenario(this)
+
+        assertFailsWith<IllegalStateException> {
+            scenario.updateTopNode<RootNode> { onEvent(TestEvent.Emit("before-start")) }
+        }
+
+        scenario.start()
+        scenario.finish()
+
+        assertFailsWith<IllegalStateException> {
+            scenario.updateTopNode<RootNode> { onEvent(TestEvent.Emit("after-finish")) }
+        }
     }
 
     private class RootNode(

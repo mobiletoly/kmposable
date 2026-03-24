@@ -16,12 +16,19 @@
 package dev.goquick.kmposable.compose
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.backhandler.BackHandler
 import dev.goquick.kmposable.runtime.NavFlow
 
 /**
- * Platform-specific back handling that delegates system back presses to the provided [NavFlow].
- *
- * Each target provides an actual implementation that hooks into the appropriate back dispatcher.
+ * Multiplatform back handling that delegates the active platform back gesture/key to [NavFlow].
  */
+@Suppress("DEPRECATION")
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-expect fun <OUT : Any> KmposableBackHandler(runtime: NavFlow<OUT, *>)
+fun <OUT : Any> KmposableBackHandler(runtime: NavFlow<OUT, *>) {
+    val navState by runtime.navState.collectAsState()
+    BackHandler(enabled = navState.size > 1) { runtime.pop() }
+}

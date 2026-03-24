@@ -27,6 +27,17 @@ class KmposableViewModelTest {
         assertTrue(node.detached)
     }
 
+    @Test
+    fun clearFromCompositionDisposesRuntime() {
+        val node = TestNode()
+        val runtime = TestRuntime(node)
+        val viewModel = TestViewModel(runtime)
+
+        viewModel.clearFromComposition()
+
+        assertTrue(node.detached)
+    }
+
     private class TestViewModel(
         runtime: TestRuntime
     ) : NavFlowViewModel<TestOutput>(runtime) {

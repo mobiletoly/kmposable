@@ -9,10 +9,18 @@ class ContactsListNode(
     parentScope = parentScope,
     initialState = ContactsListState()
 ) {
+    private var allContacts: List<Contact> = emptyList()
 
     override fun onEvent(event: ContactsListEvent) {
         when (event) {
-            is ContactsListEvent.SearchChanged -> updateState { it.copy(query = event.query) }
+            is ContactsListEvent.SearchChanged -> {
+                updateState { state ->
+                    state.copy(
+                        query = event.query,
+                        contacts = allContacts.filteredBy(event.query)
+                    )
+                }
+            }
             is ContactsListEvent.ContactClicked -> scope.launch {
                 emitOutput(ContactsFlowEvent.OpenContact(event.id))
             }
@@ -27,7 +35,14 @@ class ContactsListNode(
     }
 
     fun showContacts(contacts: List<Contact>) {
-        updateState { it.copy(isLoading = false, contacts = contacts, error = null) }
+        allContacts = contacts
+        updateState { state ->
+            state.copy(
+                isLoading = false,
+                contacts = contacts.filteredBy(state.query),
+                error = null
+            )
+        }
     }
 
     fun showError(message: String) {
@@ -46,4 +61,9 @@ sealed interface ContactsListEvent {
     data class SearchChanged(val query: String) : ContactsListEvent
     data class ContactClicked(val id: ContactId) : ContactsListEvent
     data object AddNewClicked : ContactsListEvent
+}
+
+private fun List<Contact>.filteredBy(query: String): List<Contact> {
+    if (query.isBlank()) return this
+    return filter { contact -> contact.name.contains(query, ignoreCase = true) }
 }

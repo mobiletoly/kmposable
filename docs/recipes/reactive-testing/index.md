@@ -19,7 +19,9 @@ fun contacts_shows_details() = runTest {
     val scenario = factory.createTestScenario(this).start()
 
     scenario.awaitTopNodeIs<ContactsListNode>()
-    scenario.send(ContactsListEvent.ContactClicked(ContactId("1")))
+    scenario.updateTopNode<ContactsListNode> {
+        onEvent(ContactsListEvent.ContactClicked(ContactId("1")))
+    }
 
     scenario.awaitTopNodeIs<ContactDetailsNode>()
     scenario.finish()
@@ -29,7 +31,7 @@ fun contacts_shows_details() = runTest {
 Helpers:
 
 - `start()` wires outputs and calls `NavFlow.start()`.
-- `send(event)` injects events into the top node.
+- `updateTopNode<T> { ... }` injects events into the expected top node without a runtime cast.
 - `awaitTopNodeIs<T>()`, `awaitStackTags`, `awaitStackSize` synchronise tests with navigation.
 - `awaitOutputOfType<T>()` waits for outputs emitted after the call begins.
 - `launchScript(onTrace = …)` lets you reuse production scripts inside the same scenario.

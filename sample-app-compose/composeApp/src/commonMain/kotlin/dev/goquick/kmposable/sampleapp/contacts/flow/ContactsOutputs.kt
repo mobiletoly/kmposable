@@ -10,6 +10,4 @@ sealed interface ContactsFlowEvent {
     data object NavigateBack : ContactsFlowEvent
     data class OpenEditor(val contact: Contact?) : ContactsFlowEvent
     data class DeleteContact(val id: ContactId) : ContactsFlowEvent
-    data class ContactSaved(val contact: Contact) : ContactsFlowEvent
-    data object EditorCancelled : ContactsFlowEvent
 }

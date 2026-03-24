@@ -25,6 +25,19 @@ private class EffectNode(
     fun tryEmit(effect: EffectEvent): Boolean = tryEmitEffect(effect)
 }
 
+private class EffectfulResultNode(
+    scope: kotlinx.coroutines.CoroutineScope
+) : EffectfulResultOnlyNode<Unit, Unit, EffectEvent, String>(
+    parentScope = scope,
+    initialState = Unit
+) {
+    override fun onEvent(event: Unit) = Unit
+    suspend fun emit(effect: EffectEvent, result: String) {
+        emitEffect(effect)
+        emitOk(result)
+    }
+}
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class EffectsTest {
 
@@ -61,6 +74,29 @@ class EffectsTest {
         job.cancelAndJoin()
 
         assertEquals(listOf(EffectEvent("delivered")), received)
+        node.onDetach()
+    }
+
+    @Test
+    fun effectfulResultNodeEmitsEffectsAndResults() = runTest {
+        val node = EffectfulResultNode(this)
+        val receivedEffects = mutableListOf<EffectEvent>()
+        val receivedResults = mutableListOf<KmposableResult<String>>()
+        val effectsJob = launch { node.effects.collect { receivedEffects += it } }
+        val resultJob = launch { node.result.collect { receivedResults += it } }
+        advanceUntilIdle()
+
+        node.emit(EffectEvent("saved"), "ok")
+        advanceUntilIdle()
+
+        assertEquals(listOf(EffectEvent("saved")), receivedEffects)
+        assertEquals(
+            listOf<KmposableResult<String>>(KmposableResult.Ok("ok")),
+            receivedResults
+        )
+
+        effectsJob.cancelAndJoin()
+        resultJob.cancelAndJoin()
         node.onDetach()
     }
 }

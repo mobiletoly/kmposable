@@ -56,14 +56,11 @@ fun ContactsListScreen(
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-            val filtered = state.contacts.filter {
-                state.query.isBlank() || it.name.contains(state.query, ignoreCase = true)
-            }
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(filtered) { contact ->
+                items(state.contacts) { contact ->
                     ContactRow(contact) {
                         onEvent(ContactsListEvent.ContactClicked(contact.id))
                     }

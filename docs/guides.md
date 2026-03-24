@@ -52,13 +52,14 @@ class CounterNode(parentScope: CoroutineScope) :
 }
 
 val navFlow = NavFlow(appScope = scope, rootNode = CounterNode(scope)).apply { start() }
-navFlow.sendEvent(CounterEvent.Increment)
+navFlow.updateTopNode<CounterNode> { onEvent(CounterEvent.Increment) }
 println(navFlow.navState.value.top.state.value) // 1
 ```
 
 How this reaches UI:
 - UI observes `node.state` (e.g., `collectAsState()` in Compose) and renders it.
-- UI sends user actions back as `EVENT`s via `node.onEvent(...)` or `navFlow.sendEvent(...)`.
+- UI sends user actions back as `EVENT`s via `node.onEvent(...)` or `navFlow.updateTopNode<MyNode> { ... }`
+  when it only has a NavFlow reference.
 - If a node emits `OUTPUT`, NavFlow (or a parent) uses it to navigate or surface results.
 
 ## 2. Compose Integration
@@ -108,7 +109,7 @@ scenario.finish()
 
 Highlights:
 
-- `start()`, `send(event)`, `pop()` – basic stack control.
+- `start()`, `updateTopNode<T> { ... }`, `pop()` – basic stack control.
 - `awaitTopNodeIs<T>()`, `awaitStackSize`, `awaitStackTags` – synchronise with navigation.
 - `awaitOutputOfType<T>()`, `awaitMappedOutput { … }` – wait for outputs.
 - `launchScript(onTrace = …)` – run the same NavFlow script you ship.

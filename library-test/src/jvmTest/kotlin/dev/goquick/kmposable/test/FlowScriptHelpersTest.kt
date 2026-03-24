@@ -66,7 +66,9 @@ class FlowScriptHelpersTest {
         }
 
         try {
-            scenario.send(RootEvent.EmitAction("hello"))
+            scenario.updateTopNode<RootNode> {
+                onEvent(RootEvent.EmitAction("hello"))
+            }
             withTimeout(2_000) { job.join() }
 
             scenario.assertStackSize(1)

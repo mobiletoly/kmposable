@@ -30,7 +30,9 @@ class ContactsFlowScenarioTest {
         val scenario = factory.createTestScenario(this).start()
         advanceUntilIdle()
 
-        scenario.send(ContactsListEvent.ContactClicked(contact.id))
+        scenario.updateTopNode<dev.goquick.kmposable.sampleapp.contacts.flow.ContactsListNode> {
+            onEvent(ContactsListEvent.ContactClicked(contact.id))
+        }
         advanceUntilIdle()
 
         scenario.assertTopNodeIs<ContactDetailsNode>()
@@ -48,18 +50,28 @@ class ContactsFlowScenarioTest {
         val scenario = factory.createTestScenario(this).start()
         advanceUntilIdle()
 
-        scenario.send(ContactsListEvent.ContactClicked(contact.id))
+        scenario.updateTopNode<dev.goquick.kmposable.sampleapp.contacts.flow.ContactsListNode> {
+            onEvent(ContactsListEvent.ContactClicked(contact.id))
+        }
         advanceUntilIdle()
         scenario.assertTopNodeIs<ContactDetailsNode>()
 
-        scenario.send(ContactDetailsEvent.EditClicked)
+        scenario.updateTopNode<ContactDetailsNode> {
+            onEvent(ContactDetailsEvent.EditClicked)
+        }
         advanceUntilIdle()
         scenario.assertTopNodeIs<EditContactNode>()
 
-        scenario.send(EditContactEvent.NameChanged("Bob Updated"))
-        scenario.send(EditContactEvent.PhoneChanged("777-000"))
+        scenario.updateTopNode<EditContactNode> {
+            onEvent(EditContactEvent.NameChanged("Bob Updated"))
+        }
+        scenario.updateTopNode<EditContactNode> {
+            onEvent(EditContactEvent.PhoneChanged("777-000"))
+        }
         advanceUntilIdle()
-        scenario.send(EditContactEvent.SaveClicked)
+        scenario.updateTopNode<EditContactNode> {
+            onEvent(EditContactEvent.SaveClicked)
+        }
         advanceUntilIdle()
 
         scenario.assertTopNodeIs<ContactDetailsNode>()

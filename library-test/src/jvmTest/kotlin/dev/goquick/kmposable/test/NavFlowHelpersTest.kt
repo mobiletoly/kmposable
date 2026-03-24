@@ -122,11 +122,12 @@ class NavFlowHelpersTest {
         navFlow.dispose()
         advanceUntilIdle()
 
-        // Emit the result after dispose; helper must not crash trying to pop.
+        // Emit the result after dispose; helper must not crash trying to pop and should report
+        // cancellation because the node left the stack before producing a result.
         child.emitResultNow()
         advanceUntilIdle()
         val result = withTimeout(200) { deferred.await() }
-        assertEquals(KmposableResult.Ok("late"), result)
+        assertEquals(KmposableResult.Canceled, result)
         assertTrue(!navFlow.isStarted())
     }
 

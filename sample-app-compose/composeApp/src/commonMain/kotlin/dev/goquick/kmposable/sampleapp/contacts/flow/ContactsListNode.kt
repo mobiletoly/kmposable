@@ -17,6 +17,7 @@ class ContactsListNode(
     parentScope = parentScope,
     initialState = ContactsListState()
 ) {
+    private var allContacts: List<Contact> = emptyList()
 
     override fun onAttach() {
         super.onAttach()
@@ -26,7 +27,14 @@ class ContactsListNode(
     override fun onEvent(event: ContactsListEvent) {
         when (event) {
             ContactsListEvent.ScreenStarted -> scope.launch { refreshContacts() }
-            is ContactsListEvent.SearchChanged -> updateState { it.copy(query = event.query) }
+            is ContactsListEvent.SearchChanged -> {
+                updateState { state ->
+                    state.copy(
+                        query = event.query,
+                        contacts = allContacts.filteredBy(event.query)
+                    )
+                }
+            }
             is ContactsListEvent.ContactClicked -> scope.launch {
                 emitOutput(ContactsFlowEvent.OpenContact(event.id))
             }
@@ -39,7 +47,13 @@ class ContactsListNode(
     private suspend fun refreshContacts() {
         runCatchingState(
             onStart = { it.copy(isLoading = true, error = null) },
-            onSuccess = { state, contacts -> state.copy(isLoading = false, contacts = contacts) },
+            onSuccess = { state, contacts ->
+                allContacts = contacts
+                state.copy(
+                    isLoading = false,
+                    contacts = contacts.filteredBy(state.query)
+                )
+            },
             onError = { state, error ->
                 state.copy(
                     isLoading = false,
@@ -48,6 +62,11 @@ class ContactsListNode(
             }
         ) { repository.getAll() }
     }
+}
+
+private fun List<Contact>.filteredBy(query: String): List<Contact> {
+    if (query.isBlank()) return this
+    return filter { contact -> contact.name.contains(query, ignoreCase = true) }
 }
 
 data class ContactsListState(

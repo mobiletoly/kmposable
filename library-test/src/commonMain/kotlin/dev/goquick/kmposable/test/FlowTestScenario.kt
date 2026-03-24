@@ -18,12 +18,15 @@ package dev.goquick.kmposable.test
 import dev.goquick.kmposable.core.KmposableResult
 import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.core.ResultNode
+import dev.goquick.kmposable.core.ResultOnlyNode
 import dev.goquick.kmposable.core.nav.KmposableStackEntry
 import dev.goquick.kmposable.runtime.NavFlow
 import dev.goquick.kmposable.runtime.NavFlowFactory
 import dev.goquick.kmposable.runtime.NavFlowScriptScope
 import dev.goquick.kmposable.runtime.launchNavFlowScript
 import dev.goquick.kmposable.runtime.pushAndAwaitResult
+import dev.goquick.kmposable.runtime.pushAndAwaitResultOnly
+import dev.goquick.kmposable.runtime.updateTopNode
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
@@ -64,8 +67,27 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     }
 
     /** Injects an [event] into the currently visible node. */
+    @Deprecated(
+        message = "Since 0.2.11, prefer updateTopNode<T> { ... } to fail fast when the visible node type changes."
+    )
+    @Suppress("DEPRECATION")
     fun send(event: Any): FlowTestScenario<OUT, ENTRY> = apply {
         navFlow.sendEvent(event)
+    }
+
+    /**
+     * Runs [block] only when the current top node matches [NODE].
+     *
+     * Fails fast with a descriptive message instead of relying on [NavFlow.sendEvent]'s runtime
+     * cast.
+     */
+    inline fun <reified NODE> updateTopNode(
+        block: NODE.() -> Unit
+    ): FlowTestScenario<OUT, ENTRY> where NODE : Node<*, *, *> = apply {
+        check(started) { "Call start() before interacting with the scenario." }
+        check(navFlow.updateTopNode<NODE>(block)) {
+            "Expected top node ${NODE::class.simpleName} but was ${navFlow.currentTopNode()::class.simpleName}"
+        }
     }
 
     /** Verifies whether the stack can pop. */
@@ -152,7 +174,7 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     }
 
     /** Verifies that the current top node is of type [T]. */
-    inline fun <reified T : Node<*, *, OUT>> assertTopNodeIs(): FlowTestScenario<OUT, ENTRY> = apply {
+    inline fun <reified T : Node<*, *, *>> assertTopNodeIs(): FlowTestScenario<OUT, ENTRY> = apply {
         val topNode = navFlow.navState.value.top
         check(topNode is T) {
             "Expected top node of type ${T::class.simpleName}, but was ${topNode::class.simpleName}"
@@ -160,7 +182,7 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     }
 
     /** Suspends until the top node is of type [T], or times out. */
-    suspend inline fun <reified T : Node<*, *, OUT>> awaitTopNodeIs(
+    suspend inline fun <reified T : Node<*, *, *>> awaitTopNodeIs(
         timeoutMillis: Long = 1_000
     ): FlowTestScenario<OUT, ENTRY> = apply {
         check(started) { "Call start() before awaiting navigation changes." }
@@ -191,6 +213,7 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
         } catch (_: CancellationException) {
         }
         navFlow.dispose()
+        started = false
     }
 
     /** Launches the provided [script] against the same NavFlow the UI would use. */
@@ -205,10 +228,10 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
      */
     suspend fun <RESULT : Any> pushResultNode(
         autoPop: Boolean = true,
-        factory: () -> ResultNode<RESULT>
+        factory: () -> ResultOnlyNode<*, *, RESULT>
     ): KmposableResult<RESULT> {
         check(started) { "Call start() before pushing nodes." }
-        return navFlow.pushAndAwaitResult(factory = factory, autoPop = autoPop)
+        return navFlow.pushAndAwaitResultOnly(factory = factory, autoPop = autoPop)
     }
 
     /** Suspends until [mapper] produces a value from the next output and returns it. */
@@ -239,13 +262,14 @@ class FlowTestScenario<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
      */
     suspend fun <RESULT : Any> pushOverlayResult(
         autoPop: Boolean = true,
-        factory: () -> ResultNode<RESULT>
+        factory: () -> ResultOnlyNode<*, *, RESULT>
     ): KmposableResult<RESULT> = pushResultNode(autoPop = autoPop, factory = factory)
 
     /**
      * Awaits a typed result from a [ResultNode] currently on top of the stack. If the node leaves
      * the stack before producing a result, returns [KmposableResult.Canceled].
      */
+    @Suppress("UNCHECKED_CAST")
     suspend inline fun <reified RESULT : Any> awaitTopResult(
         timeoutMillis: Long = 1_000
     ): KmposableResult<RESULT> {

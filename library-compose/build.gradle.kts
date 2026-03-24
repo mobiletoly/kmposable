@@ -1,5 +1,3 @@
-import com.android.build.api.dsl.androidLibrary
-import org.jetbrains.compose.ExperimentalComposeLibrary
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -10,7 +8,6 @@ plugins {
     alias(libs.plugins.vanniktechMavenPublish)
 }
 
-@OptIn(ExperimentalComposeLibrary::class)
 kotlin {
     jvmToolchain(17)
     jvm {
@@ -18,7 +15,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-    androidLibrary {
+    android {
         namespace = "dev.goquick.kmposable.compose"
         compileSdk = libs.versions.androidCompileSdk.get().toInt()
         minSdk = libs.versions.androidMinSdk.get().toInt()
@@ -41,8 +38,9 @@ kotlin {
         val commonMain by getting {
             dependencies {
                 implementation(project(":library-core"))
-                implementation(compose.runtime)
-                implementation(compose.foundation)
+                implementation(libs.composeRuntime)
+                implementation(libs.composeFoundation)
+                implementation(libs.composeUiBackhandler)
                 implementation(libs.androidxLifecycleViewmodel)
             }
         }
@@ -69,9 +67,9 @@ kotlin {
                 implementation(libs.androidxTestRunner)
                 implementation(libs.kotlinTest)
                 implementation(libs.kotlinxCoroutinesTest)
-                implementation(compose.runtime)
-                implementation(compose.material3)
-                implementation(compose.uiTestJUnit4)
+                implementation(libs.composeRuntime)
+                implementation(libs.composeMaterial3)
+                implementation(libs.composeUiTestJunit4)
             }
         }
         val androidDeviceTest by getting {
@@ -79,9 +77,9 @@ kotlin {
                 implementation(libs.androidxTestExt)
                 implementation(libs.androidxTestRunner)
                 implementation(libs.androidxTestCore)
-                implementation(compose.runtime)
-                implementation(compose.material3)
-                implementation(compose.uiTestJUnit4)
+                implementation(libs.composeRuntime)
+                implementation(libs.composeMaterial3)
+                implementation(libs.composeUiTestJunit4)
             }
         }
     }
@@ -118,5 +116,13 @@ mavenPublishing {
             connection = "scm:git:git://github.com/mobiletoly/kmposable.git"
             developerConnection = "scm:git:git://github.com/mobiletoly/kmposable.git"
         }
+    }
+}
+
+tasks.configureEach {
+    if (name == "copyAndroidDeviceTestComposeResourcesToAndroidAssets") {
+        val outputDirectoryGetter = javaClass.methods.first { it.name == "getOutputDirectory" }
+        val outputDirectory = outputDirectoryGetter.invoke(this) as org.gradle.api.file.DirectoryProperty
+        outputDirectory.set(layout.buildDirectory.dir("generated/compose/deviceTest/assets"))
     }
 }

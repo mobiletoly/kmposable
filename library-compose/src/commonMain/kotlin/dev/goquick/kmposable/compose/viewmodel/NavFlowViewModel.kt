@@ -50,13 +50,25 @@ import kotlinx.coroutines.cancel
 abstract class NavFlowViewModel<OUT : Any>(
     val navFlow: NavFlow<OUT, *>
 ) : ViewModel() {
+    private var cleared = false
 
     init {
         navFlow.start()
     }
 
-    override fun onCleared() {
+    protected open fun disposeViewModel() {
         navFlow.dispose()
+    }
+
+    @PublishedApi
+    internal fun clearFromComposition() {
+        if (cleared) return
+        cleared = true
+        disposeViewModel()
+    }
+
+    override fun onCleared() {
+        clearFromComposition()
         super.onCleared()
     }
 }
@@ -138,7 +150,7 @@ inline fun <reified VM, OUT : Any> kmposableViewModelFromDi(): VM
         ?: error(
             "No KmposableViewModelFactory provided. " +
                 "Supply LocalKmposableViewModelFactory in CompositionLocalProvider " +
-                "or use kmposableViewModel { ... }."
+                "or use navFlowViewModel { ... } / rememberNavFlowViewModel { ... }."
         )
 
     return navFlowViewModel {
@@ -166,8 +178,8 @@ internal class RememberNavFlowViewModel<OUT : Any>(
     private val flowScope: kotlinx.coroutines.CoroutineScope,
     navFlow: NavFlow<OUT, *>,
 ) : NavFlowViewModel<OUT>(navFlow) {
-    override fun onCleared() {
-        super.onCleared()
+    override fun disposeViewModel() {
+        super.disposeViewModel()
         flowScope.cancel()
     }
 }

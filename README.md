@@ -107,7 +107,7 @@ class CounterNode(parentScope: CoroutineScope) :
 }
 
 val navFlow = NavFlow(scope, CounterNode(scope)).apply { start() }
-navFlow.sendEvent(CounterEvent.Increment)
+navFlow.updateTopNode<CounterNode> { onEvent(CounterEvent.Increment) }
 ```
 
 Hook it up to Compose with a renderer:

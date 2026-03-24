@@ -16,11 +16,8 @@ repository - each section below links to source directories.
 | `StatefulNode`                                                             | Base class that manages state via `MutableStateFlow`, exposes `updateState`, `emitOutput`.                                                                            |
 | `DelegatingNode`                                                           | Wraps another node and delegates everything by default - override only the parts you need (e.g., map outputs).                                                        |
 | `EffectSource` / `EffectfulStatefulNode`                                   | Opt-in effects channel for one-off side effects (analytics, toasts, etc.) separate from outputs.                                                                      |
+| `EffectfulResultfulStatefulNode` / `EffectfulResultOnlyNode`               | Convenience base for flows that need both a typed result channel and transient effects (snackbar/dialog/analytics) in the same node.                                   |
 | `ResultNode`, `ResultfulStatefulNode`, `ResultOnlyNode`, `KmposableResult` | Opt-in "start for result" contract; `ResultfulStatefulNode` provides the flow + emit helpers; `ResultOnlyNode` is the OUTPUT=Nothing variant for result-only screens. |
-| `runCatchingState`                                                         | Helper on `StatefulNode` to standardize loading/success/error updates around suspending calls (reducers for start/success/error).                                      |
-| `mirrorChildState`                                                         | Helper on `StatefulNode` to mirror a child `StateFlow` into parent state via a mapper.                                                                                |
-| `runCatchingState`                                                         | Helper on `StatefulNode` to standardize loading/success/error updates around suspending calls (reducers for start/success/error).                                      |
-| `mirrorChildState`                                                         | Helper on `StatefulNode` to mirror a child `StateFlow` into parent state via a mapper.                                                                                |
 | `runCatchingState`                                                         | Helper on `StatefulNode` to standardize loading/success/error updates around suspending calls (reducers for start/success/error).                                      |
 | `mirrorChildState`                                                         | Helper on `StatefulNode` to mirror a child `StateFlow` into parent state via a mapper.                                                                                |
 
@@ -28,7 +25,7 @@ repository - each section below links to source directories.
 
 - `NavFlow<OUT, ENTRY>` - headless runtime that owns a navigator (`KmposableNavigator`). exposes
   `navState: StateFlow<KmposableNavState<OUT, ENTRY>>`, `outputs: Flow<OUT>`, stack operations
-  (`push`, `pop`, `replaceAll`, `popTo`...), `sendEvent`, and lifecycle (`start`/`dispose`).
+  (`push`, `pop`, `replaceAll`, `popTo`...), low-level `sendEvent`, and lifecycle (`start`/`dispose`).
 - `KmposableNavigator` / `KmposableStackNavigator` - stack implementation used by NavFlow. Accepts
   custom stack entry types when you need metadata.
 - `KmposableNavState` - snapshot with `stack`, `top`, `root`, `size` accessors.
@@ -42,7 +39,8 @@ repository - each section below links to source directories.
 - Helpers: `runCatchingNodeCall`, `awaitOutputCase`, `pushForResult`,
   `pushAndAwaitResult(factory/onResult)`, result-only helpers `pushAndAwaitResultOnly` /
   `launchPushAndAwaitResultOnly`,
-  safe stack ops `pushIfStarted`/`popIfStarted`, `withNode`, etc.
+  safe stack ops `pushIfStarted`/`popIfStarted`, typed top-node helpers
+  `withTopNode` / `updateTopNode`, `withNode`, etc.
 
 ## Compose Adapters (`library-compose`)
 
@@ -50,8 +48,8 @@ repository - each section below links to source directories.
 - `NavFlowHost(navFlow, renderer, enableBackHandler)` - observes `navFlow.navState` and renders the
   top node. Automatically wires `KmposableBackHandler` unless disabled.
 - `nodeRenderer { register<MyNode> { ... } }` - DSL mapping node types to composables.
-- `KmposableBackHandler` - expect/actual back handling that delegates to NavFlow (
-  Android/iOS/Desktop).
+- `KmposableBackHandler` - multiplatform back handler; delegates iOS swipe-back / desktop `Esc` /
+  Android back to NavFlow when the stack can pop.
 - `CollectEffects(node) { ... }` - lifecycle-aware helper to collect `EffectSource.effects` in
   Compose and route them to UI (e.g., snackbar, dialog, logging).
 - `rememberNode` / `NodeHost` - create/host standalone nodes (not managed by NavFlow) with automatic
@@ -73,7 +71,7 @@ repository - each section below links to source directories.
 `FlowTestScenario` is the main DSL:
 
 - `start()` - begins collecting outputs and calls `NavFlow.start()`.
-- `send(event)` / `pop()` / `assertCanPop()` - manipulate the stack.
+- `updateTopNode<T> { ... }` / `pop()` / `assertCanPop()` - manipulate the stack.
 - `assertTopNodeTag`, `assertStackSize`, `assertStackTags` - synchronous assertions.
 - `awaitTopNodeIs<T>()`, `awaitStackSize`, `awaitStackTags` - suspend until NavFlow reaches a state.
 - `awaitNextOutput`, `awaitMappedOutput`, `awaitOutputOfType<T>()` - wait for outputs.

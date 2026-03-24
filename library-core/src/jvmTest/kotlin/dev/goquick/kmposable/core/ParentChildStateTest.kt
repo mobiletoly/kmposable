@@ -1,11 +1,13 @@
 package dev.goquick.kmposable.core
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlinx.coroutines.flow.MutableStateFlow
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ParentChildStateTest {
 
     @Test

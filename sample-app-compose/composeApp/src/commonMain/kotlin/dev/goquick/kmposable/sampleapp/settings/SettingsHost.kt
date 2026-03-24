@@ -16,9 +16,9 @@ import dev.goquick.kmposable.sampleapp.settings.overlay.SettingsOverlayNode
  */
 @Composable
 fun SettingsHost(node: SettingsNode) {
-    val overlayController = rememberOverlayController<Unit>()
+    val overlayController = rememberOverlayController<Nothing>()
     val overlayRenderer = remember {
-        nodeRenderer<Unit> {
+        nodeRenderer<Nothing> {
             registerResultOnly<SettingsOverlayNode> { SettingsOverlayHost(it) }
         }
     }

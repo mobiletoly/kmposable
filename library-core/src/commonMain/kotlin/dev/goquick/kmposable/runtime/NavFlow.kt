@@ -167,6 +167,9 @@ open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
      * Injects [event] into the currently visible node. The caller must ensure the payload matches
      * the node's expected event type to avoid a [ClassCastException].
      */
+    @Deprecated(
+        message = "Since 0.2.11, prefer node.onEvent(...) or updateTopNode<T> { ... } to avoid runtime type mismatches."
+    )
     fun sendEvent(event: Any) {
         ensureStarted()
         dispatchEvent(currentTopNode(), event)

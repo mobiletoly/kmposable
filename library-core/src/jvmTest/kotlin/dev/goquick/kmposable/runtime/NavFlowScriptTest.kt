@@ -42,7 +42,7 @@ class NavFlowScriptTest {
         val emitter = launch {
             repeat(3) {
                 delay(10)
-                navFlow.sendEvent(TestEvent.Emit)
+                navFlow.updateTopNode<EmittingNode> { onEvent(TestEvent.Emit) }
             }
         }
 
@@ -101,7 +101,7 @@ class NavFlowScriptTest {
         }
 
         launch {
-            navFlow.sendEvent(TestEvent.EmitSpecial)
+            navFlow.updateTopNode<EmittingNode> { onEvent(TestEvent.EmitSpecial) }
         }
 
         job.join()
@@ -128,7 +128,7 @@ class NavFlowScriptTest {
 
         launch {
             delay(10)
-            navFlow.sendEvent(TestEvent.EmitSpecial)
+            navFlow.updateTopNode<EmittingNode> { onEvent(TestEvent.EmitSpecial) }
         }
 
         job.join()

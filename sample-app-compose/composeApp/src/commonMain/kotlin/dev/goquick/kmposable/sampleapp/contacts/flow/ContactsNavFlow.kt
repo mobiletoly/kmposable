@@ -1,14 +1,12 @@
 package dev.goquick.kmposable.sampleapp.contacts.flow
 
-import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.core.nav.DefaultStackEntry
 import dev.goquick.kmposable.core.nav.KmposableStackNavigator
 import dev.goquick.kmposable.core.KmposableResult
 import dev.goquick.kmposable.runtime.NavFlow
-import dev.goquick.kmposable.sampleapp.contacts.Contact
 import dev.goquick.kmposable.sampleapp.contacts.ContactId
 import dev.goquick.kmposable.sampleapp.contacts.ContactsRepository
-import kotlinx.coroutines.flow.first
+import dev.goquick.kmposable.runtime.pushAndAwaitResultOnly
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -25,7 +23,7 @@ class ContactsNavFlow(
     navigatorFactory = { entry -> KmposableStackNavigator(entry) }
 ) {
 
-    override fun onNodeOutput(node: Node<*, *, ContactsFlowEvent>, output: ContactsFlowEvent) {
+    override fun onNodeOutput(node: dev.goquick.kmposable.core.Node<*, *, ContactsFlowEvent>, output: ContactsFlowEvent) {
         when (output) {
             is ContactsFlowEvent.OpenContact -> push(ContactDetailsNode(output.id, repository, appScope))
             ContactsFlowEvent.CreateContact -> launchEditor(existingContact = null)
@@ -36,17 +34,20 @@ class ContactsNavFlow(
                 pop()
                 refreshList()
             }
-            is ContactsFlowEvent.ContactSaved -> Unit // handled via pushForResult
-            ContactsFlowEvent.EditorCancelled -> pop()
         }
     }
 
-    private fun launchEditor(existingContact: Contact?) {
+    private fun launchEditor(existingContact: dev.goquick.kmposable.sampleapp.contacts.Contact?) {
         appScope.launch {
-            val node = EditContactNode(existingContact = existingContact, repository = repository, parentScope = appScope)
-            push(node)
-            val result = node.result.first()
-            pop()
+            val result = pushAndAwaitResultOnly(
+                factory = {
+                    EditContactNode(
+                        existingContact = existingContact,
+                        repository = repository,
+                        parentScope = appScope
+                    )
+                }
+            )
             when (result) {
                 is KmposableResult.Ok<*> -> {
                     refreshList()
