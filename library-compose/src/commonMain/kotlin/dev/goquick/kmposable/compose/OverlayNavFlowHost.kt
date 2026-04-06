@@ -46,6 +46,7 @@ fun <OUT : Any> OverlayNavFlowHost(
         KmposableBackHandler(navFlow)
     }
     val navState by navFlow.navState.collectAsState()
+    val saveableStateHolder = rememberNavFlowSaveableStateHolder(navState)
     val layers = navState.toOverlayLayers()
     val slots = remember { mutableStateMapOf<Any, OverlaySlot<OUT, KmposableStackEntry<OUT>>>() }
     val currentNodes = layers.overlays.map { it.node }.toSet()
@@ -65,7 +66,9 @@ fun <OUT : Any> OverlayNavFlowHost(
 
     Box {
         if (layers.base.node !is OverlayRootPlaceholder) {
-            renderer.Render(layers.base.node)
+            saveableStateHolder.SaveableStateProvider(key = layers.base.saveableStateKey) {
+                renderer.Render(layers.base.node)
+            }
         }
         val orderedSlots = slots.values.sortedBy {
             currentNodes.indexOf(it.entry.node).takeIf { idx -> idx >= 0 } ?: Int.MAX_VALUE
@@ -83,7 +86,9 @@ fun <OUT : Any> OverlayNavFlowHost(
                 if (slot.state.currentState || slot.state.targetState) {
                     overlayScrim?.invoke()
                 }
-                renderer.Render(entry.node)
+                saveableStateHolder.SaveableStateProvider(key = entry.saveableStateKey) {
+                    renderer.Render(entry.node)
+                }
                 AutoCloseEffect(entry.node, navFlow)
                 LaunchedEffect(slot.state.isIdle, slot.state.targetState) {
                     if (!slot.state.targetState && slot.state.isIdle) {

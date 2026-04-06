@@ -35,5 +35,9 @@ fun <OUT : Any> NavFlowHost(
         KmposableBackHandler(navFlow)
     }
     val navState by navFlow.navState.collectAsState()
-    renderer.Render(navState.top)
+    val saveableStateHolder = rememberNavFlowSaveableStateHolder(navState)
+    val topEntry = navState.topEntry
+    saveableStateHolder.SaveableStateProvider(key = topEntry.saveableStateKey) {
+        renderer.Render(topEntry.node)
+    }
 }

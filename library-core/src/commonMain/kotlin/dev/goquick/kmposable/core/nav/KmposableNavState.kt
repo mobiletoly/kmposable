@@ -17,6 +17,7 @@ package dev.goquick.kmposable.core.nav
 
 import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.core.StatefulNode
+import kotlin.random.Random
 
 /** Represents a typed stack entry that wraps a [Node]. */
 interface KmposableStackEntry<OUT : Any> {
@@ -24,6 +25,13 @@ interface KmposableStackEntry<OUT : Any> {
     val node: Node<*, *, OUT>
     /** Optional logical identifier (used for logging/tests). */
     val tag: String?
+    /**
+     * Stable key used by Compose hosts to preserve saveable subtree state for this entry while it
+     * remains on the runtime stack. Custom value-based entries should include this identity in
+     * their equality semantics if replacements need to be observable through [KmposableNavState].
+     */
+    val saveableStateKey: String
+        get() = buildInstanceScopedSaveableStateKey(node = node, entry = this)
 }
 
 enum class Presentation { Primary, Overlay }
@@ -44,7 +52,8 @@ fun Any?.isOverlayPresentation(): Boolean =
 /** Default stack entry implementation that simply wraps a [Node]. */
 data class DefaultStackEntry<OUT : Any>(
     override val node: Node<*, *, OUT>,
-    override val tag: String? = node.resolveNodeTag()
+    override val tag: String? = node.resolveNodeTag(),
+    override val saveableStateKey: String = buildDefaultSaveableStateKey(tag, node)
 ) : KmposableStackEntry<OUT>
 
 /**
@@ -77,3 +86,23 @@ data class KmposableNavState<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
 
 internal fun Node<*, *, *>.resolveNodeTag(): String? =
     (this as? StatefulNode<*, *, *>)?.id ?: this::class.simpleName
+
+private fun buildInstanceScopedSaveableStateKey(
+    node: Node<*, *, *>,
+    entry: Any
+): String {
+    val prefix = node::class.simpleName ?: "node"
+    val stableSuffix = stableIdentityHashCode(entry).toUInt().toString(16)
+    return "$prefix@$stableSuffix"
+}
+
+private fun buildDefaultSaveableStateKey(tag: String?, node: Node<*, *, *>): String {
+    val prefix = saveableStateKeyPrefix(tag, node)
+    val randomSuffix = Random.nextLong().toULong().toString(16)
+    return "$prefix@$randomSuffix"
+}
+
+private fun saveableStateKeyPrefix(tag: String?, node: Node<*, *, *>): String =
+    tag ?: node.resolveNodeTag() ?: "node"
+
+internal expect fun stableIdentityHashCode(instance: Any): Int
