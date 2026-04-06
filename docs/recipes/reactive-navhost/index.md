@@ -1,11 +1,16 @@
 ---
 layout: doc
-title: Compose + NavHost + NavFlow
+title: Legacy: Compose NavHost + NavFlow
 permalink: /cookbook/recipes/reactive-navhost/
 ---
 
-NavHost owns tabs/routes; Kmposable owns inner flows. The sample app uses this split with Contacts (NavFlow)
-and Settings (single node).
+This is a **legacy 0.2.x-style recipe**.
+
+For `0.3.x`, the recommended app-shell architecture is **Navigation 3 KMP + kmposable**, not
+Compose `NavHost` + kmposable.
+
+This page is kept only for teams that deliberately stay on a non-Nav3 shell. If you are starting a
+new Compose KMP app, prefer the [Navigation 3 KMP architecture page]({{ site.baseurl }}/navigation3-kmp/).
 
 When to use:
 - Apps that already use NavHost for top-level routes/tabs but want Kmposable flows per destination.
@@ -59,7 +64,7 @@ private fun contactsRenderer(): NodeRenderer<ContactsFlowEvent> = nodeRenderer {
 }
 ```
 
-### Why it matters
+### Why it still exists
 
 - Keeps NavHost responsible for top-level navigation (tabs, deep links).
 - Kmposable stays reusable/headless inside each destination.

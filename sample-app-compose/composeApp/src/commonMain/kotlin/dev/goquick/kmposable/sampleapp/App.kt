@@ -1,27 +1,21 @@
 package dev.goquick.kmposable.sampleapp
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import dev.goquick.kmposable.compose.NavFlowHost
 import dev.goquick.kmposable.compose.nodeRenderer
 import dev.goquick.kmposable.compose.rememberNode
-import dev.goquick.kmposable.compose.viewmodel.rememberNavFlowViewModel
+import dev.goquick.kmposable.navigation3.CollectNavFlowOutputs
+import dev.goquick.kmposable.navigation3.rememberKmposableNavEntryDecorators
+import dev.goquick.kmposable.navigation3.rememberNavigation3NavFlow
 import dev.goquick.kmposable.sampleapp.contacts.Contact
 import dev.goquick.kmposable.sampleapp.contacts.ContactId
 import dev.goquick.kmposable.sampleapp.contacts.InMemoryContactsRepository
@@ -42,7 +36,6 @@ import dev.goquick.kmposable.sampleapp.settings.SettingsNode
 // - Screens are pure UI (state in, events out), making them easy to preview/reuse.
 @Composable
 fun App() {
-    val navController = rememberNavController()
     val repository = remember {
         InMemoryContactsRepository(
             listOf(
@@ -51,36 +44,44 @@ fun App() {
             )
         )
     }
+    val backStack = rememberNavBackStack(sampleAppNavConfiguration, ContactsRoute)
+    val navigationController = remember(backStack) {
+        SampleAppNavigationController(backStack)
+    }
+    val entryDecorators = rememberKmposableNavEntryDecorators<NavKey>()
 
     MaterialTheme {
-        Scaffold(
-            bottomBar = { AppBottomBar(navController) }
-        ) { paddingValues ->
-            NavHost(
-                navController = navController,
-                startDestination = AppRoute.Contacts.route,
-                modifier = Modifier.padding(paddingValues)
-            ) {
-                composable(AppRoute.Contacts.route) {
-                    ContactsDestination(repository)
+        Scaffold { _ ->
+            NavDisplay(
+                backStack = backStack,
+                entryDecorators = entryDecorators,
+                entryProvider = { route ->
+                    when (route) {
+                        ContactsRoute -> NavEntry(route) {
+                            ContactsDestination(
+                                repository = repository,
+                                onFlowOutput = navigationController::onContactsOutput,
+                            )
+                        }
+                        SettingsRoute -> NavEntry(route) {
+                            SettingsDestination(onNavigateBack = navigationController::navigateBack)
+                        }
+                        else -> error("Unsupported route: $route")
+                    }
                 }
-                composable(AppRoute.Settings.route) {
-                    SettingsDestination()
-                }
-            }
+            )
         }
     }
 }
 
 @Composable
 private fun ContactsDestination(
-    repository: InMemoryContactsRepository
+    repository: InMemoryContactsRepository,
+    onFlowOutput: (ContactsFlowEvent) -> Unit,
 ) {
-    // Use a ViewModel-backed flow so the nav stack survives configuration changes.
-    val navFlowVm = rememberNavFlowViewModel<ContactsFlowEvent> { scope ->
+    val navFlow = rememberNavigation3NavFlow<ContactsFlowEvent> { scope ->
         ContactsNavFlow(repository = repository, appScope = scope)
     }
-    val navFlow = navFlowVm.navFlow
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Renderer maps nodes → hosts. Hosts then wire state/effects to pure Screens.
@@ -91,60 +92,21 @@ private fun ContactsDestination(
             registerResultOnly<EditContactNode> { node -> EditContactHost(node, snackbarHostState) }
         }
     }
+    CollectNavFlowOutputs(navFlow = navFlow, onOutput = onFlowOutput)
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-    ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            NavFlowHost(navFlow = navFlow, renderer = renderer)
-        }
+    ) { _ ->
+        NavFlowHost(navFlow = navFlow, renderer = renderer)
     }
 }
 
 @Composable
-private fun SettingsDestination() {
+private fun SettingsDestination(onNavigateBack: () -> Boolean) {
     val node = rememberNode { scope -> SettingsNode(parentScope = scope) }
 
-    SettingsHost(node)
-}
-
-@Composable
-private fun AppBottomBar(navController: NavHostController) {
-    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
-    val currentRoute = currentDestination?.route
-    NavigationBar {
-        AppRoute.bottomTabs.forEach { tab ->
-            val selected = currentDestination?.hierarchy?.any { it.route == tab.route } == true
-            NavigationBarItem(
-                selected = selected,
-                onClick = {
-                    if (!selected) {
-                        navController.navigate(tab.route) {
-                            popUpTo(navController.graph.startDestinationId) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
-                },
-                icon = { Text(tab.shortLabel) },
-                label = { Text(tab.label) }
-            )
-        }
-    }
-}
-
-private sealed class AppRoute(val route: String) {
-    data object Contacts : AppRoute("contacts")
-    data object Settings : AppRoute("settings")
-
-    companion object {
-        val bottomTabs = listOf(
-            BottomTab(route = Contacts.route, label = "Contacts", shortLabel = "C"),
-            BottomTab(route = Settings.route, label = "Settings", shortLabel = "S")
-        )
-    }
-
-    data class BottomTab(val route: String, val label: String, val shortLabel: String)
+    SettingsHost(
+        node = node,
+        onNavigateBack = { onNavigateBack() },
+    )
 }

@@ -23,14 +23,18 @@ repository - each section below links to source directories.
 
 ## Navigation Runtime (`library-core/runtime`)
 
-- `NavFlow<OUT, ENTRY>` - headless runtime that owns a navigator (`KmposableNavigator`). exposes
+- `NavFlow<OUT, ENTRY>` - headless runtime that owns a navigator (`KmposableNavigator`). Exposes
   `navState: StateFlow<KmposableNavState<OUT, ENTRY>>`, `outputs: Flow<OUT>`, stack operations
   (`push`, `pop`, `replaceAll`, `popTo`...), low-level `sendEvent`, and lifecycle (`start`/`dispose`).
-- `KmposableNavigator` / `KmposableStackNavigator` - stack implementation used by NavFlow. Accepts
-  custom stack entry types when you need metadata.
-- `KmposableNavState` - snapshot with `stack`, `top`, `root`, `size` accessors.
-- `KmposableStackEntry` / `DefaultStackEntry` - pair node with metadata; override when you need tags
-  or IDs for testing/analytics.
+  The public `ENTRY` generic survives in `0.3.x` because scripts, tests, and advanced hosts still
+  need typed stack entries without coupling core to Navigation 3.
+- `KmposableNavigator` / `KmposableStackNavigator` - advanced stack implementation hooks used by
+  `NavFlow`. These remain public in `0.3.x`, but they are not the recommended app-shell routing
+  model for Compose KMP apps.
+- `KmposableNavState` - read-only stack snapshot with `stack`, `top`, `root`, `size` accessors for
+  renderers, tests, and scripts.
+- `KmposableStackEntry` / `DefaultStackEntry` - pair node with metadata such as tags and saveable
+  state identity. These remain advanced runtime customization points in `0.3.x`.
 - `NavDiff` / `diffNavState` - structural diff between nav states (pushed/popped entries).
 - `NavFlowScriptScope` - script-facing API (`showRoot`, `pushNode`, `replaceTop`, `awaitOutput*`,
   `trace`, `createEntry`, `navState`). Run scripts via
@@ -46,7 +50,8 @@ repository - each section below links to source directories.
 
 - `rememberNavFlow(key, factory)` - creates/starts/disposes a NavFlow tied to a composable scope.
 - `NavFlowHost(navFlow, renderer, enableBackHandler)` - observes `navFlow.navState` and renders the
-  top node. Automatically wires `KmposableBackHandler` unless disabled.
+  top node. In `0.3.x`, this is primarily the host for a feature-local runtime, not the
+  recommended whole-app router.
 - `nodeRenderer { register<MyNode> { ... } }` - DSL mapping node types to composables.
 - `KmposableBackHandler` - multiplatform back handler; delegates iOS swipe-back / desktop `Esc` /
   Android back to NavFlow when the stack can pop.
@@ -54,9 +59,11 @@ repository - each section below links to source directories.
   Compose and route them to UI (e.g., snackbar, dialog, logging).
 - `rememberNode` / `NodeHost` - create/host standalone nodes (not managed by NavFlow) with automatic
   attach/detach and state collection; optionally collect outputs inline.
-- `rememberOverlayNavFlow` + `OverlayNavFlowHost` - overlay-only stacks without dummy roots.
+- `rememberOverlayNavFlow` + `OverlayNavFlowHost` - overlay-only stacks without dummy roots for
+  feature-local overlays.
 - `rememberOverlayController` + `OverlayHost` - bundle overlay NavFlow creation, push/await helpers,
-  and hosting (defaults to fade in/out; works with `Presentation.Overlay` nodes).
+  and hosting for feature-local overlays. This is a legacy/non-primary path for app-shell overlay
+  concerns in `0.3.x`.
 - `AutoCloseOverlay` - opt-in marker for overlay result nodes; hosts pop the overlay once a result
   is emitted (`Ok`/`Canceled` by default). Complements `autoPop = true` (caller-driven pop) by
   covering fire-and-forget launches or `autoPop = false`.
@@ -65,6 +72,19 @@ repository - each section below links to source directories.
 - `NavFlowLogger` / `NodeErrorLogger` - optional hooks for logging telemetry (attach/detach/output)
   and node-level errors without threading loggers through every host.
 - `OverlayNavFlowHost` respects per-node animation hints via `OverlayAnimationAware` if provided.
+
+## Navigation 3 KMP Integration (`library-navigation3`)
+
+- `rememberKmposableNavEntryDecorators()` - installs the saveable-state and entry-scoped ViewModel
+  decorators needed to host kmposable flows inside Navigation 3 destinations.
+- `rememberNavigation3NavFlow(factory)` - creates a kmposable `NavFlow` that reuses the current
+  `LocalViewModelStoreOwner` when hosted under Navigation 3.
+- `kmposableNavFlowEntry(...)` - helper to create a `NavEntry` whose content hosts a kmposable
+  feature runtime.
+- `CollectNavFlowOutputs(navFlow, onOutput)` - collect feature outputs at the app adapter layer.
+- `navKeySavedStateConfiguration(serializersModule)` - helper for building the required
+  `SavedStateConfiguration` while keeping route serialization ownership in the app shell.
+- `pushSingleTop(destination)` - back stack mutation helper for app-owned Navigation 3 routes.
 
 ## Testing (`library-test`)
 

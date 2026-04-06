@@ -23,6 +23,7 @@ rootProject.name = "KMPosable"
 include(
     ":library-core",
     ":library-compose",
+    ":library-navigation3",
     ":library-test",
     ":sample-app-compose",
     ":sample-app-compose:composeApp",

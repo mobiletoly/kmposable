@@ -1,12 +1,12 @@
 # kmposable Architecture
 
-kmposable is a **headless flow engine** for Kotlin Multiplatform (KMP).  
+kmposable is a **headless workflow/runtime layer** for Kotlin Multiplatform (KMP).  
 It manages a stack (or tree) of **Nodes** – each Node owns state, handles events, and emits
-outputs – without depending on any specific UI framework.
+outputs – without depending on any specific UI framework or app-shell router.
 
 Think of kmposable as:
 
-> A navigation + state orchestration layer **under** your UI, not **inside** it.
+> A feature workflow + state orchestration layer **under** your UI, not **instead of** your app shell.
 
 You can plug Compose, SwiftUI, web, or even a CLI on top.
 
@@ -14,17 +14,18 @@ You can plug Compose, SwiftUI, web, or even a CLI on top.
 
 ## High-Level Layers
 
-kmposable is split into three conceptual layers:
+kmposable is split into four conceptual layers:
 
 1. **Core (`library-core`)**
     - `Node<STATE, EVENT, OUTPUT>` / `StatefulNode` (state + outputs + child scope)
     - `LifecycleAwareNode` hook for attach/detach callbacks
     - Platform-neutral and fully testable.
 
-2. **Navigation (`library-core` nav package)**
+2. **Navigation internals (`library-core` nav package)**
     - `KmposableStackEntry` + `DefaultStackEntry` (wrap a node + optional tag)
     - `KmposableNavState<OUT, ENTRY>` (immutable snapshot, stack never empty)
     - `KmposableNavigator<OUT, ENTRY>` + `KmposableStackNavigator` (entry-based push/pop/replace/popTo)
+    - Still part of `library-core`, but must remain Navigation 3 agnostic.
 
 3. **Runtime (`library-core` runtime package)**
     - `NavFlow<OUT, ENTRY>` owns:
@@ -35,9 +36,21 @@ kmposable is split into three conceptual layers:
     - `NavFlowFactory` + `SimpleNavFlowFactory` expose a standard way to build flows for UI/tests.
     - `FlowTestScenario` (in `library-test`) drives a runtime headlessly in unit tests.
 
+4. **UI adapters / integrations**
+    - `library-compose`
+        - generic Compose hosting (`NavFlowHost`, `NodeRenderer`, `NavFlowViewModel`,
+          lifecycle helpers)
+        - remains usable without Navigation 3 for standalone feature hosting
+    - `library-navigation3`
+        - Navigation 3 KMP integration
+        - destination decorators
+        - entry-scoped `NavFlow` creation
+        - feature-output collection helpers
+
 UI adapters (Compose, SwiftUI, etc.) live in **separate modules** and observe the runtime to render
-the current Node(s). The Compose adapter (`library-compose`) supplies `NavFlowHost`,
-`NodeRenderer`, `NavFlowViewModel`, and lifecycle helpers so Compose code stays declarative.
+the current Node(s). The Navigation 3 integration is intentionally outside `library-core` so the
+headless runtime stays independent from `NavKey`, `NavBackStack`, `NavEntry`, route
+serialization, or scene composition concerns.
 
 ---
 
@@ -77,16 +90,42 @@ A **Node** is the core unit of logic:
 - `rememberNavFlow` ties runtime `start()`/`dispose()` to composition.
 - `NavFlowViewModel` / `navFlowViewModel` make flows lifecycle-aware in Compose.
 - Sample modules:
-    - `sample-app-compose`: uses the Compose adapter to demonstrate the ergonomic API.
+    - `sample-app-compose`: uses Navigation 3 KMP for the app shell and kmposable for an inner
+      feature workflow.
+
+### Navigation 3 Integration
+
+For Compose Multiplatform apps, the primary `0.3.x` architecture is:
+
+- Navigation 3 KMP owns:
+    - app routes
+    - outer back stack
+    - destination save/restore
+    - scene composition
+    - entry-scoped ViewModel ownership
+- kmposable owns:
+    - feature workflow runtime
+    - feature-local node stack
+    - outputs emitted by feature logic
+    - headless flow tests and scripts
+
+This means `library-core` must not depend on:
+
+- `NavKey`
+- `NavBackStack`
+- `NavEntry`
+- `NavDisplay`
+- `SavedStateConfiguration`
+- `SerializersModule`
 
 ---
 
-## Relationship to UI Navigation
+## Relationship to App Navigation
 
-kmposable is **headless** and **UI-agnostic**, unlike Jetpack/Compose Navigation.
+kmposable is **headless** and **UI-agnostic**. It does not replace a Compose app shell.
 
-Compose Navigation = UI router  
-kmposable = flow engine
+Navigation 3 KMP = app-shell router  
+kmposable = feature workflow runtime
 
 ---
 
@@ -99,3 +138,4 @@ kmposable = flow engine
 5. Composable layers
 6. Small surface area
 7. Testability and parity across platforms (FlowTestScenario, shared FlowFactory)
+8. Navigation 3 compatibility at the integration layer, not in the core layer

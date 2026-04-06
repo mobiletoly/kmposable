@@ -42,6 +42,12 @@ fun ContactsListScreen(
         ) {
             Text("Add Contact")
         }
+        Button(
+            onClick = { onEvent(ContactsListEvent.SettingsClicked) },
+            modifier = Modifier.padding(top = 12.dp)
+        ) {
+            Text("Open Settings")
+        }
 
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

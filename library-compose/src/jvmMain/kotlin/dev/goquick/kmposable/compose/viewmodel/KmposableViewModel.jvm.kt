@@ -18,11 +18,19 @@ package dev.goquick.kmposable.compose.viewmodel
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @Composable
 actual inline fun <reified VM, OUT : Any> navFlowViewModel(
     noinline factory: () -> VM
 ): VM where VM : NavFlowViewModel<OUT> {
+    val owner = LocalViewModelStoreOwner.current
+    if (owner != null) {
+        return viewModel(
+            viewModelStoreOwner = owner,
+        ) { factory() }
+    }
     val viewModel = remember { factory() }
     DisposableEffect(viewModel) {
         onDispose { viewModel.clearFromComposition() }

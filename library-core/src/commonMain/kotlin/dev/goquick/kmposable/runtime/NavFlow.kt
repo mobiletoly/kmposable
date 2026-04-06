@@ -33,11 +33,17 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 
 /**
- * Primary headless runtime that drives a stack of [Node]s. UI adapters
- * observe [navState] to render tree snapshots, feed user events via [sendEvent], and react to
- * business outputs using [outputs]. All lifecycle and navigation semantics live here so the same
- * runtime can power tests, CLIs, or UI shells. Call [start] once the surrounding environment is
- * ready, and [dispose] when the flow is torn down; both methods are idempotent.
+ * Primary headless runtime that drives a stack of [Node]s. UI adapters observe [navState] to
+ * render tree snapshots, feed user events via [sendEvent], and react to business outputs using
+ * [outputs]. All lifecycle and navigation semantics live here so the same runtime can power
+ * tests, CLIs, or UI shells.
+ *
+ * The public [ENTRY] generic remains part of `0.3.x` because scripts, tests, and advanced hosts
+ * still rely on typed stack entries and stack snapshots. Navigation 3 integration lives outside of
+ * this type in `library-navigation3`; `NavFlow` itself stays Navigation 3 agnostic.
+ *
+ * Call [start] once the surrounding environment is ready, and [dispose] when the flow is torn
+ * down; both methods are idempotent.
  */
 open class NavFlow<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     private val appScope: CoroutineScope,

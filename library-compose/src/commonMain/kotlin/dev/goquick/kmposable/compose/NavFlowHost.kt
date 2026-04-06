@@ -23,6 +23,10 @@ import dev.goquick.kmposable.runtime.NavFlow
 /**
  * Observes [navFlow] and renders whichever node sits on top using [renderer].
  *
+ * In `0.3.x`, this is primarily the Compose host for a kmposable feature runtime. When the feature
+ * is hosted inside Navigation 3 KMP, let the outer shell own app routes and disable back handling
+ * here if the outer environment already handles it.
+ *
  * Set [enableBackHandler] to false if hosting within an environment that already handles back.
  */
 @Composable

@@ -21,12 +21,17 @@ import dev.goquick.kmposable.sampleapp.settings.SettingsState
 fun SettingsScreen(
     state: SettingsState,
     onEvent: (SettingsEvent) -> Unit,
-    onShowOverlay: (() -> Unit)? = null,
+    onNavigateBack: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Surface(modifier = modifier) {
         Column(modifier = Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Text(text = "Settings", style = MaterialTheme.typography.headlineMedium)
+            if (onNavigateBack != null) {
+                Button(onClick = onNavigateBack) {
+                    Text("Back")
+                }
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -37,11 +42,6 @@ fun SettingsScreen(
                     checked = state.allowSync,
                     onCheckedChange = { onEvent(SettingsEvent.AllowSyncChanged(it)) }
                 )
-            }
-            if (onShowOverlay != null) {
-                Button(onClick = onShowOverlay) {
-                    Text("Show overlay")
-                }
             }
         }
     }

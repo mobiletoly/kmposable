@@ -8,12 +8,15 @@ Pick a recipe to dive deeper:
 
 ## Reactive
 
+- [Navigation 3 KMP Architecture](../navigation3-kmp/) – recommended `0.3.x` app-shell pattern.
+- [Non-Nav3 Compose Hosting](../non-nav3-compose/) – supported fallback path if you are not on Navigation 3.
+- [Nav3 vs Non-Nav3](../compose-paths/) – which Compose path to choose.
 - [Single-Screen Node](./recipes/reactive-single-screen/)
 - [Node → Host → Screen Layering](./recipes/reactive-layering/)
 - [Renderer Patterns](./recipes/reactive-renderers/)
-- [Compose + NavHost + NavFlow](./recipes/reactive-navhost/)
+- [Legacy: Compose NavHost + NavFlow](./recipes/reactive-navhost/)
 - [FlowTestScenario Assertions](./recipes/reactive-testing/)
-- [Reactive Overlays](./recipes/reactive-overlays/) – render overlays with `OverlayNavFlowHost`, scrims, and optional animations.
+- [Reactive Overlays](./recipes/reactive-overlays/) – feature-local overlays with `OverlayNavFlowHost`, scrims, and optional animations.
 
 ## Sequential Scripts (experimental)
 

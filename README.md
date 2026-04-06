@@ -5,13 +5,15 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/mobiletoly/kmposable/gradle.yml?branch=main&logo=github&label=CI)](https://github.com/mobiletoly/kmposable/actions/workflows/gradle.yml)
 [![License](https://img.shields.io/github/license/mobiletoly/kmposable?logo=apache&label=License)](LICENSE)
 
-A **UI-agnostic navigation + flow engine** for Kotlin Multiplatform.  
-Kmposable lets you structure your app as pure, testable **Nodes** (state + events + outputs).  
-Compose UI becomes a thin rendering layer on top.
+A **workflow/runtime layer** for Kotlin Multiplatform features.  
+Kmposable lets you structure feature logic as pure, testable **Nodes** (state + events + outputs)
+and run them headlessly with `NavFlow`.  
+For Compose KMP apps, the recommended architecture is **Navigation 3 KMP for the app shell** and
+**kmposable for inner feature workflows**.
 
-> **Build your entire app flow without UI.  
-> Add UI later.  
-> Test everything headlessly.**
+> Build feature workflows without UI.  
+> Plug them into Navigation 3 KMP or another shell later.  
+> Test the business logic headlessly.
 
 ---
 
@@ -19,7 +21,7 @@ Compose UI becomes a thin rendering layer on top.
 
 Modern Compose apps often struggle with:
 
-- Navigation tightly coupled to UI
+- Feature logic tightly coupled to UI navigation
 - Bloated ViewModels
 - Hard-to-test flows (list → details → edit → confirm…)
 - Reusing flows across platforms or screens
@@ -31,7 +33,7 @@ Modern Compose apps often struggle with:
 
 State + events + outputs. No UI code.
 
-### ✔ A tiny NavFlow engine that manages navigation
+### ✔ A headless NavFlow runtime that manages feature flow state
 
 Push, pop, replace — all headless.
 
@@ -58,7 +60,7 @@ Manages a stack of nodes.
 
 ### **3. NavFlow**
 
-Runs the flow, drives navigation, exposes state.
+Runs the feature workflow, drives node transitions, exposes state.
 
 ```
 Node (state, events, outputs)
@@ -72,6 +74,34 @@ That’s the core of Kmposable.
 
 ---
 
+# Recommended Architecture
+
+For `0.3.x`, the primary Compose story is:
+
+- Navigation 3 KMP owns app routes, outer back stack, save/restore, and scene composition.
+- Kmposable owns feature-local workflow state, node orchestration, outputs, and headless tests.
+
+Use `library-navigation3` to host kmposable flows inside Navigation 3 destinations.
+
+## When To Use Kmposable
+
+- You want headless, deterministic feature workflows that survive outside Compose.
+- You want the same feature logic reusable across Android, iOS, desktop, or tests.
+- You want a thin UI layer that renders node state instead of owning the flow.
+
+## When Not To Use Kmposable
+
+- You only need app-level routing and standard destination screens.
+- Your feature logic is trivial enough that a full workflow runtime adds no value.
+- You want kmposable to replace Navigation 3 as the app-shell router in a Compose KMP app.
+
+## Compose Paths
+
+- `Navigation 3 KMP + kmposable`
+  Recommended for new Compose KMP apps.
+- `Non-Nav3 Compose + kmposable`
+  Supported fallback for teams that are not on Navigation 3 yet or intentionally want a smaller setup.
+
 # Documentation & Guides
 
 Detailed docs now live at **https://mobiletoly.github.io/kmposable**:
@@ -79,6 +109,10 @@ Detailed docs now live at **https://mobiletoly.github.io/kmposable**:
 - [Overview](https://mobiletoly.github.io/kmposable/overview/) – philosophy, modules, samples.
 - [Hello Kmposable](https://mobiletoly.github.io/kmposable/guides/hello-kmposable/) – first flow end-to-end.
 - [Guides](https://mobiletoly.github.io/kmposable/guides/) – Compose integration, testing, patterns.
+- [Navigation 3 KMP Architecture](https://mobiletoly.github.io/kmposable/navigation3-kmp/) – recommended `0.3.x` app-shell split.
+- [Non-Nav3 Compose Hosting](https://mobiletoly.github.io/kmposable/non-nav3-compose/) – supported fallback path for standalone Compose hosting.
+- [Nav3 vs Non-Nav3](https://mobiletoly.github.io/kmposable/compose-paths/) – which path to choose.
+- [0.2.x -> 0.3.x Migration](https://mobiletoly.github.io/kmposable/migration-0-2-to-0-3/) – breaking changes and migration path.
 - [NavFlow Scripts](https://mobiletoly.github.io/kmposable/guides/flowscripts/) – sequential orchestration.
 - [Cookbook](https://mobiletoly.github.io/kmposable/cookbook/) – reactive + script recipes.
 - [Reference](https://mobiletoly.github.io/kmposable/reference/) – API summaries for core/compose/test.
@@ -134,7 +168,7 @@ See the docs for full walkthroughs.
 
 # Samples
 
-- `sample-app-compose` — Compose Multiplatform app with NavHost tabs + Kmposable flows.
+- `sample-app-compose` — Compose Multiplatform app with a Navigation 3 KMP shell and inner kmposable flow.
 - `sample-app-flowscript` — Same UI but orchestrated via a NavFlow script.
 
 Both samples include READMEs with run/test instructions.

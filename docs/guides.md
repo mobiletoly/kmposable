@@ -10,6 +10,12 @@ permalink: /guides/
   Compose host, headless test.
 - **Core Guides** (below) – deep dives into Compose integration, scripts, testing, and advanced patterns.
 
+## Choose A Compose Path
+
+- **Recommended**: [Navigation 3 KMP]({{ site.baseurl }}/navigation3-kmp/)
+- **Supported fallback**: [Non-Nav3 Compose Hosting]({{ site.baseurl }}/non-nav3-compose/)
+- **Quick comparison**: [Nav3 vs Non-Nav3]({{ site.baseurl }}/compose-paths/)
+
 ## 1. Getting Started
 
 ### Install
@@ -18,12 +24,14 @@ permalink: /guides/
 dependencies {
     implementation("dev.goquick.kmposable:core:<version>")
     implementation("dev.goquick.kmposable:compose:<version>")
+    implementation("dev.goquick.kmposable:navigation3:<version>") // when using Navigation 3 KMP
     testImplementation("dev.goquick.kmposable:test:<version>")
 }
 ```
 
 Replace `<version>` with the latest release from Maven Central. `core` is mandatory, `compose` is
-needed only if you render with Jetpack Compose, and `test` pulls in `FlowTestScenario` utilities.
+needed only if you render with Jetpack Compose, `navigation3` is the preferred Compose KMP
+integration layer, and `test` pulls in `FlowTestScenario` utilities.
 
 ### Smallest NavFlow
 
@@ -84,16 +92,24 @@ fun CounterScreen() {
 }
 ```
 
-### NavHost rules
+### Navigation 3 KMP rules
 
-1. NavHost owns tabs/top-level routes (`contacts`, `profile`, `contactDetails/{id}`).
-2. Inside each destination, create a Kmposable ViewModel/NavFlow and render via `NavFlowHost`.
-3. Map node outputs directly to `NavController.navigate(...)`/`popBackStack()`.
-4. Use `KmposableBackHandler(navFlow)` (or `enableBackHandler=true` on `NavFlowHost`) so NavFlow can
-   consume internal back events.
-5. Keep Kotlin code multiplatform; no androidX ViewModels or platform-specific helpers.
+1. Navigation 3 KMP owns app routes, outer back stack, and destination save/restore.
+2. Inside each destination, create a kmposable feature runtime and render it via `NavFlowHost`.
+3. Map feature outputs to app-owned back stack mutations in the app layer, not inside nodes.
+4. Use `rememberKmposableNavEntryDecorators()` so Navigation 3 owns destination-scoped saveable state and `ViewModelStore`s.
+5. Keep node/business logic Navigation 3 free. The adapter layer is where app routing happens.
 
-Full structure is described in the [NavHost integration summary](../spec_docs/NAVHOST_INTEGRATION_SUMMARY.md).
+See [Navigation 3 KMP]({{ site.baseurl }}/navigation3-kmp/) for the current recommended shape.
+
+### Non-Nav3 Compose rules
+
+1. Use `NavFlowHost` as a feature host, not as the preferred future-facing app-shell story.
+2. Keep the outer shell explicit in your app code.
+3. Treat overlays as feature-local helpers rather than shell infrastructure.
+4. Plan to migrate app-shell concerns to Navigation 3 KMP if you want the primary `0.3.x` architecture.
+
+See [Non-Nav3 Compose Hosting]({{ site.baseurl }}/non-nav3-compose/) for the fallback path.
 
 ## 3. Testing (Reactive or Scripted Flows)
 

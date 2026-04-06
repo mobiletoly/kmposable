@@ -34,6 +34,7 @@ class ContactsNavFlow(
                 pop()
                 refreshList()
             }
+            ContactsFlowEvent.OpenSettings -> Unit
         }
     }
 

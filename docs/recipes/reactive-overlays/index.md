@@ -1,10 +1,18 @@
 ---
 layout: doc
-title: Reactive – Overlays with NavFlow
+title: Reactive – Feature Overlays with NavFlow
 permalink: /cookbook/recipes/reactive-overlays/
 ---
 
-Render overlay nodes (dialogs/sheets) on top of a base screen with `OverlayNavFlowHost`, keeping the base visible and allowing custom animations.
+This page documents **feature-local overlays**. It is **not** the recommended app-shell overlay
+story for `0.3.x` Compose KMP apps.
+
+For app-level scenes, routes, and shell composition, prefer Navigation 3 KMP. Use
+`OverlayNavFlowHost` only when an individual feature workflow still benefits from kmposable-managed
+overlay nodes.
+
+Render overlay nodes (dialogs/sheets) on top of a base screen with `OverlayNavFlowHost`, keeping
+the base visible and allowing custom animations.
 
 Diagram:
 ```
@@ -18,7 +26,7 @@ When to use:
 - Modals/bottom sheets driven by nodes (`Presentation.Overlay`) where the base screen stays visible.
 - You need enter/exit animations without manual overlay plumbing.
 - Overlay-only stacks: use `rememberOverlayNavFlow()` so you don’t have to seed a dummy root.
- - Prefer the new `OverlayController` + `OverlayHost` helpers to avoid boilerplate.
+- Prefer the new `OverlayController` + `OverlayHost` helpers to avoid boilerplate.
 
 ## When to use
 

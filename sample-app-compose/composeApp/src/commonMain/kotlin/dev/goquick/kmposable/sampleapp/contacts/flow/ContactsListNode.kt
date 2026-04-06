@@ -41,6 +41,9 @@ class ContactsListNode(
             ContactsListEvent.AddNewClicked -> scope.launch {
                 emitOutput(ContactsFlowEvent.CreateContact)
             }
+            ContactsListEvent.SettingsClicked -> scope.launch {
+                emitOutput(ContactsFlowEvent.OpenSettings)
+            }
         }
     }
 
@@ -81,4 +84,5 @@ sealed interface ContactsListEvent {
     data class SearchChanged(val query: String) : ContactsListEvent
     data class ContactClicked(val id: ContactId) : ContactsListEvent
     data object AddNewClicked : ContactsListEvent
+    data object SettingsClicked : ContactsListEvent
 }

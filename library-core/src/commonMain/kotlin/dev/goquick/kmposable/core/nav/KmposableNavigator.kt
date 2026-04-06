@@ -19,8 +19,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 /**
- * Maintains the navigation stack and exposes immutable [KmposableNavState] updates. Implementations must
- * guarantee that the stack is never empty – every runtime always has a root entry.
+ * Maintains the navigation stack and exposes immutable [KmposableNavState] updates. Implementations
+ * must guarantee that the stack is never empty – every runtime always has a root entry.
+ *
+ * This remains public in `0.3.x` as an advanced runtime extension point for custom in-memory stack
+ * behavior. It is not the recommended way to model app-shell navigation in Compose KMP apps; that
+ * role belongs to Navigation 3 outside of `library-core`.
  */
 interface KmposableNavigator<OUT : Any, ENTRY : KmposableStackEntry<OUT>> {
     /** Stream of stack snapshots; renderers observe this to update UI. */
@@ -45,7 +49,7 @@ interface KmposableNavigator<OUT : Any, ENTRY : KmposableStackEntry<OUT>> {
     fun popTo(target: ENTRY, inclusive: Boolean = false): List<ENTRY>
 }
 
-/** Basic navigator implementation backed by an in-memory mutable list. */
+/** Basic in-memory navigator used by [dev.goquick.kmposable.runtime.NavFlow]. */
 class KmposableStackNavigator<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     initialEntry: ENTRY
 ) : KmposableNavigator<OUT, ENTRY> {

@@ -27,7 +27,10 @@ import kotlinx.coroutines.flow.firstOrNull
 
 /**
  * Overlay-aware variant of [NavFlowHost] that renders a primary entry and any overlay entries
- * above it. Use when your stack contains nodes marked with `Presentation.Overlay`.
+ * above it. Use when a feature-local workflow contains nodes marked with `Presentation.Overlay`.
+ *
+ * This is not the recommended app-shell overlay system for `0.3.x` Compose KMP apps. Prefer
+ * Navigation 3 KMP for outer scenes/routes, and keep this host for feature-specific overlays.
  *
  * - Finds the last non-overlay entry in the stack to treat as the base layer.
  * - Renders all entries above it that declare overlay presentation on top, in stack order.

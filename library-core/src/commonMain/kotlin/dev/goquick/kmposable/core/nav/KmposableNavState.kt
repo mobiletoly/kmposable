@@ -19,7 +19,13 @@ import dev.goquick.kmposable.core.Node
 import dev.goquick.kmposable.core.StatefulNode
 import kotlin.random.Random
 
-/** Represents a typed stack entry that wraps a [Node]. */
+/**
+ * Represents a typed stack entry that wraps a [Node].
+ *
+ * This remains public in `0.3.x` as an advanced headless/runtime customization point for tests,
+ * scripts, saveable-state identity, and host metadata. It is not part of the primary Navigation 3
+ * integration story.
+ */
 interface KmposableStackEntry<OUT : Any> {
     /** Concrete node instance backing this entry. */
     val node: Node<*, *, OUT>
@@ -60,6 +66,9 @@ data class DefaultStackEntry<OUT : Any>(
  * Immutable snapshot of the navigator stack. Entries are ordered from root (index 0) to the
  * current top. The stack is guaranteed to contain at least one element for the lifetime of a
  * runtime, which simplifies rendering code (no “empty stack” branch).
+ *
+ * The snapshot remains public in `0.3.x` because renderers, tests, and scripts need direct,
+ * typed access to the runtime stack without binding core to a specific UI router.
  */
 data class KmposableNavState<OUT : Any, ENTRY : KmposableStackEntry<OUT>>(
     /** Ordered collection of entries, bottom (index 0) to top. */

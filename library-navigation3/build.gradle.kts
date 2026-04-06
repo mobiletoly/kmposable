@@ -16,7 +16,7 @@ kotlin {
         }
     }
     android {
-        namespace = "dev.goquick.kmposable.compose"
+        namespace = "dev.goquick.kmposable.navigation3"
         compileSdk = libs.versions.androidCompileSdk.get().toInt()
         minSdk = libs.versions.androidMinSdk.get().toInt()
 
@@ -30,19 +30,16 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_17)
         }
     }
-    iosX64()
     iosArm64()
     iosSimulatorArm64()
 
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":library-core"))
-                implementation(libs.composeRuntime)
-                implementation(libs.composeFoundation)
-                implementation(libs.composeUiBackhandler)
-                implementation(libs.androidxLifecycleViewmodel)
-                implementation(libs.androidxLifecycleViewmodelCompose)
+                api(project(":library-core"))
+                api(project(":library-compose"))
+                api(libs.navigation3Ui)
+                api(libs.navigation3LifecycleViewmodel)
             }
         }
         val commonTest by getting {
@@ -51,29 +48,9 @@ kotlin {
                 implementation(libs.kotlinxCoroutinesTest)
             }
         }
-        val jvmTest by getting {
-            dependencies {
-                implementation(libs.kotlinxCoroutinesTest)
-            }
-        }
-        val androidMain by getting {
-            dependencies {
-                implementation(libs.androidxActivityCompose)
-            }
-        }
-        val androidHostTest by getting {
-            dependencies {
-                implementation(libs.androidxTestExt)
-                implementation(libs.androidxTestRunner)
-                implementation(libs.kotlinTest)
-                implementation(libs.kotlinxCoroutinesTest)
-                implementation(libs.composeRuntime)
-                implementation(libs.composeMaterial3)
-                implementation(libs.composeUiTestJunit4)
-            }
-        }
         val androidDeviceTest by getting {
             dependencies {
+                implementation(libs.androidxActivityCompose)
                 implementation(libs.androidxTestExt)
                 implementation(libs.androidxTestRunner)
                 implementation(libs.androidxTestCore)
@@ -90,12 +67,12 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates(group.toString(), "compose", version.toString())
+    coordinates(group.toString(), "navigation3", version.toString())
 
     pom {
-        name = "KMPosable Compose adapter"
-        description = "Compose Multiplatform adapter for KMPosable"
-        inceptionYear = "2025"
+        name = "KMPosable Navigation 3 integration"
+        description = "Navigation 3 KMP integration module for KMPosable"
+        inceptionYear = "2026"
         url = "https://github.com/mobiletoly/kmposable/"
         licenses {
             license {

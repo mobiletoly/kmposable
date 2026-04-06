@@ -13,12 +13,7 @@ actual fun <OUT : Any> rememberNavFlowViewModel(
 ): NavFlowViewModel<OUT> {
     val instanceKey = rememberSaveable { Random.nextLong() }
     val key = "kmposable.rememberNavFlowViewModel:$instanceKey"
-    val viewModelFactory = InternalKmposableViewModelFactory {
-        createRememberNavFlowViewModel(factory)
-    }
-
-    return viewModel<RememberNavFlowViewModel<OUT>>(
+    return viewModel(
         key = key,
-        factory = viewModelFactory,
-    )
+    ) { createRememberNavFlowViewModel(factory) }
 }
